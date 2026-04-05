@@ -10,5 +10,5 @@ export interface GameCardData {
   sport: { sportId: string; slug: string; name: string };
   league: { slug: string; name: string };
   country: { slug: string; name: string };
-  participants: { name: string; image?: string }[];
+  participants: { name: string; image?: string | null }[];
 }
