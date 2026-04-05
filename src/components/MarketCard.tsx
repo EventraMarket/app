@@ -8,7 +8,7 @@ interface GameCardProps {
     startsAt: string;
     sport: { name: string };
     league: { name: string };
-    participants: { name: string; image?: string }[];
+    participants: { name: string; image?: string | null }[];
   };
 }
 
