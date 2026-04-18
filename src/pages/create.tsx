@@ -39,7 +39,7 @@ export default function CreateMarketPage() {
 
           <h2 className="text-xl font-bold text-center mb-4">Oracle-Powered Markets</h2>
           <p className="text-gray-400 text-sm text-center max-w-lg mx-auto mb-8">
-            Unlike traditional prediction market platforms, Azuro Protocol markets are created and
+            Unlike traditional prediction market platforms,Eventra markets are created and
             resolved by decentralized oracle providers. This ensures accurate outcomes and fair pricing
             for all participants.
           </p>

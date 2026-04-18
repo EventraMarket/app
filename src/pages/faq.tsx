@@ -7,15 +7,9 @@ const geistSans = Geist({
   subsets: ["latin"],
 });
 
-interface FAQItem {
-  question: string;
-  answer: string;
-  category: string;
-}
-
-const faqs: FAQItem[] = [
+const faqs = [
   {
-    category: "Getting Started",
+    category: "Getting Started",  
     question: "What is a prediction market?",
     answer:
       "A prediction market is a platform where you can trade on the outcome of future events. Prices reflect the crowd's belief about how likely an outcome is. If you think an outcome is undervalued, you buy shares — and profit if you're right.",
@@ -30,7 +24,7 @@ const faqs: FAQItem[] = [
     category: "Getting Started",
     question: "What tokens do I need?",
     answer:
-      "Markets on Azuro Protocol use the native bet token on Polygon Amoy testnet. You'll need testnet tokens in your wallet to place trades. Gas fees on the testnet are very low.",
+      "Markets onEventra use the native bet token on Polygon Amoy testnet. You'll need testnet tokens in your wallet to place trades. Gas fees on the testnet are very low.",
   },
   {
     category: "Trading",
@@ -66,11 +60,11 @@ const faqs: FAQItem[] = [
     category: "Platform",
     question: "Is this decentralized?",
     answer:
-      "Yes. All trading, resolution, and payouts happen through Azuro Protocol smart contracts on Polygon Amoy. You sign and send transactions from your own wallet.",
+      "Yes. All trading, resolution, and payouts happen throughEventra smart contracts on Polygon Amoy. You sign and send transactions from your own wallet.",
   },
   {
     category: "Platform",
-    question: "What is Azuro Protocol?",
+    question: "What isEventra?",
     answer:
       "Azuro Protocol is the decentralized prediction markets infrastructure powering this platform. It provides oracle-fed markets, liquidity pools, and smart contracts for trading, resolution, and payouts across multiple chains.",
   },
@@ -102,7 +96,7 @@ export default function FAQPage() {
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold mb-4">Frequently Asked Questions</h1>
           <p className="text-gray-400 text-lg max-w-xl mx-auto">
-            Everything you need to know about prediction markets and trading on Azuro Protocol.
+            Everything you need to know about prediction markets and trading onEventra.
           </p>
         </div>
 
@@ -202,6 +196,15 @@ export default function FAQPage() {
                 className="px-6 py-2.5 border border-gray-500 text-gray-300 text-sm font-semibold rounded-lg hover:bg-white/5 transition-colors"
               >
                 Telegram
+              </a>
+              <a
+                href="https://x.com/azuroprotocol"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-6 py-2.5 border border-gray-500 text-gray-300 text-sm font-semibold rounded-lg hover:bg-white/5 transition-colors flex items-center gap-2"
+              >
+                
+                X
               </a>
             </div>
           </div>

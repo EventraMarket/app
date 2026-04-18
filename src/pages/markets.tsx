@@ -41,7 +41,7 @@ export default function MarketsPage() {
         {/* Page header */}
         <div className="mb-6 md:mb-8">
           <h1 className="text-2xl md:text-3xl font-bold mb-2">All Markets</h1>
-          <p className="text-gray-400">Browse and trade on prediction markets powered by Azuro Protocol</p>
+          <p className="text-gray-400">Browse and trade on prediction markets on Eventra</p>
         </div>
 
         {/* Filters bar */}
@@ -113,11 +113,11 @@ export default function MarketsPage() {
         </div>
 
         <div className="mt-2 text-right text-xs text-gray-600">
-          Powered by Azuro Protocol on Polygon Amoy Testnet
+          Eventra on Polygon Amoy Testnet
         </div>
       </main>
     </div>
   );
 
-// ...existing code...
+
 }

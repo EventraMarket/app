@@ -28,7 +28,7 @@ export default function HeroSection() {
 
         {/* Subtitle */}
         <p className="text-gray-400 text-base md:text-lg mb-8 md:mb-10 max-w-sm md:max-w-md">
-          Trade on the outcome of real-world sports &amp; esports events — powered by Azuro Protocol
+          Trade on the outcome of real-world sports &amp; esports events — powered by Eventra
         </p>
 
         {/* CTA Buttons */}

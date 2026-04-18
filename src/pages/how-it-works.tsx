@@ -12,7 +12,7 @@ const steps = [
     number: "01",
     title: "Browse Markets",
     description:
-      "Explore a wide range of prediction markets on sports events — from football to basketball, tennis, and more. Every market is powered by Azuro Protocol on Polygon Amoy testnet.",
+      "Explore a wide range of prediction markets on sports events — from football to basketball, tennis, and more. Every market is powered by Eventra on Polygon Amoy testnet.",
     icon: (
       <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -45,7 +45,7 @@ const steps = [
     number: "04",
     title: "Claim Winnings",
     description:
-      "When the event resolves, winning trades pay out. Redeem your winnings directly to your wallet — no intermediaries, no delays. Everything is settled on-chain via Azuro Protocol.",
+      "When the event resolves, winning trades pay out. Redeem your winnings directly to your wallet — no intermediaries, no delays. Everything is settled on-chain viaEventra.",
     icon: (
       <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -57,7 +57,7 @@ const steps = [
 const features = [
   {
     title: "On-Chain & Transparent",
-    description: "All markets run on Polygon Amoy smart contracts via Azuro Protocol. Every trade, resolution, and payout is publicly verifiable.",
+    description: "All markets run on Polygon Amoy smart contracts viaEventra. Every trade, resolution, and payout is publicly verifiable.",
   },
   {
     title: "Gasless Trading",
