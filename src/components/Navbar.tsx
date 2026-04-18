@@ -1,177 +1,119 @@
 import Link from "next/link";
 import Image from "next/image";
-import { useState } from "react";
 import { useWallet } from "@/context/WalletContext";
 
 export default function Navbar() {
   const { address, isConnected, connecting, connect, disconnect } = useWallet();
-  const [copied, setCopied] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
-
-  const copyAddress = () => {
-    if (!address) return;
-    navigator.clipboard.writeText(address);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 1500);
-  };
-
   const navLinks = [
-    { href: "/markets", label: "Markets" },
-    { href: "/my-bets", label: "My Bets" },
     { href: "/how-it-works", label: "How It Works" },
     { href: "/faq", label: "FAQ" },
     { href: "/faucet", label: "Faucet" },
   ];
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-[#0a0e1a]/80 backdrop-blur-md border-b border-white/5">
-      <div className="flex items-center justify-between px-4 md:px-8 py-3">
-        {/* Logo */}
-        <Link
-          href="/"
-          className="flex items-center gap-2 text-[#3b82f6] font-semibold text-sm flex-shrink-0"
-        >
-          <Image src="/logo-predict.png" alt="Logo" width={28} height={28} /> Home
-        </Link>
-
-        {/* Desktop nav links */}
-        <div className="hidden lg:flex items-center gap-6">
-          {navLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className="text-gray-300 hover:text-white text-sm transition-colors"
-            >
-              {link.label}
-            </Link>
-          ))}
-        </div>
-
-        {/* Desktop right actions */}
-        <div className="hidden lg:flex items-center gap-3">
+    <>
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-[var(--color-card)]/90 backdrop-blur-md border-b border-[var(--color-border)]">
+        <div className="flex items-center justify-between px-4 md:px-12 py-3">
+          {/* Logo */}
           <Link
-            href="/create"
-            className="px-4 py-1.5 bg-gradient-to-r from-[#1e40af] to-[#3b82f6] text-white rounded-md text-sm font-semibold hover:from-[#1d4ed8] hover:to-[#60a5fa] transition-all shadow-lg shadow-blue-500/20"
+            href="/"
+            className="flex items-center gap-2 font-bold text-lg text-[var(--color-accent2)] tracking-tight"
           >
-            About
+            <Image src="/logo-predict.png" alt="Logo" width={32} height={32} />
+            <span className="hidden sm:inline">Predict Market</span>
           </Link>
 
-          {isConnected ? (
-            <div className="flex items-center gap-2">
-              <div
-                onClick={copyAddress}
-                title={address}
-                className="flex items-center gap-2 px-3 py-1.5 bg-[#111d3a] border border-[#1e3a5f] rounded-md cursor-pointer hover:bg-[#162a4a] transition-colors"
-              >
-                <div className="w-2 h-2 rounded-full bg-green-400" />
-                <span className="text-xs text-gray-300 font-mono">
-                  {address?.slice(0, 6)}...{address?.slice(-4)}
-                </span>
-                <span className="text-[10px] text-gray-500">
-                  {copied ? "\u2713" : "\ud83d\udccb"}
-                </span>
-              </div>
-              <button
-                onClick={disconnect}
-                className="px-3 py-1.5 border border-red-500/40 text-red-400 rounded-md text-sm hover:bg-red-500/10 transition-colors"
-              >
-                Disconnect
-              </button>
-            </div>
-          ) : (
-            <button
-              onClick={connect}
-              disabled={connecting}
-              className="px-4 py-1.5 bg-gradient-to-r from-[#1e40af] to-[#3b82f6] text-white rounded-md text-sm font-semibold hover:from-[#1d4ed8] hover:to-[#60a5fa] transition-all shadow-lg shadow-blue-500/20 disabled:opacity-50"
-            >
-              {connecting ? "Connecting..." : "Connect Wallet"}
-            </button>
-          )}
-        </div>
-
-        {/* Mobile: wallet + hamburger */}
-        <div className="flex lg:hidden items-center gap-2">
-          {isConnected ? (
-            <div
-              onClick={copyAddress}
-              className="flex items-center gap-1 px-2 py-1 bg-[#111d3a] border border-[#1e3a5f] rounded-md cursor-pointer"
-            >
-              <div className="w-2 h-2 rounded-full bg-green-400" />
-              <span className="text-[10px] text-gray-300 font-mono">
-                {address?.slice(0, 4)}...{address?.slice(-3)}
-              </span>
-            </div>
-          ) : (
-            <button
-              onClick={connect}
-              disabled={connecting}
-              className="px-3 py-1.5 bg-gradient-to-r from-[#1e40af] to-[#3b82f6] text-white rounded-md text-xs font-semibold disabled:opacity-50"
-            >
-              {connecting ? "..." : "Connect"}
-            </button>
-          )}
-
-          <button
-            onClick={() => setMenuOpen(!menuOpen)}
-            className="p-2 text-gray-300 hover:text-white transition-colors"
-            aria-label="Toggle menu"
-          >
-            {menuOpen ? (
-              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            ) : (
-              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            )}
-          </button>
-        </div>
-      </div>
-
-      {/* Mobile menu */}
-      {menuOpen && (
-        <div className="lg:hidden border-t border-white/5 bg-[#0a0e1a]/95 backdrop-blur-md">
-          <div className="flex flex-col px-4 py-3 gap-1">
+          {/* Desktop nav links */}
+          <div className="hidden md:flex items-center gap-8">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
-                onClick={() => setMenuOpen(false)}
-                className="text-gray-300 hover:text-white text-sm py-2.5 px-3 rounded-lg hover:bg-white/5 transition-colors"
+                className="text-[var(--color-foreground)] hover:text-[var(--color-accent)] text-base font-medium transition-colors"
               >
                 {link.label}
               </Link>
             ))}
-            <Link
-              href="/create"
-              onClick={() => setMenuOpen(false)}
-              className="text-gray-300 hover:text-white text-sm py-2.5 px-3 rounded-lg hover:bg-white/5 transition-colors"
-            >
-              About
-            </Link>
+          </div>
 
-            <div className="border-t border-white/5 mt-2 pt-3">
-              {isConnected ? (
+          {/* Connect Wallet button */}
+          <div className="flex items-center gap-3">
+            {isConnected && address ? (
+              <div className="flex items-center gap-2 bg-[var(--color-background)] border border-[var(--color-border)] rounded-[var(--radius-md)] px-3 py-1.5 text-[var(--color-accent2)] font-mono text-xs">
+                <span>{address.slice(0, 6)}...{address.slice(-4)}</span>
                 <button
-                  onClick={() => { disconnect(); setMenuOpen(false); }}
-                  className="w-full py-2.5 border border-red-500/40 text-red-400 rounded-lg text-sm hover:bg-red-500/10 transition-colors"
+                  onClick={disconnect}
+                  className="ml-2 text-[var(--color-danger)] hover:underline text-xs font-semibold"
+                  title="Disconnect"
                 >
-                  Disconnect Wallet
+                  Disconnect
                 </button>
-              ) : (
-                <button
-                  onClick={() => { connect(); setMenuOpen(false); }}
-                  disabled={connecting}
-                  className="w-full py-2.5 bg-gradient-to-r from-[#1e40af] to-[#3b82f6] text-white rounded-lg text-sm font-semibold disabled:opacity-50"
-                >
-                  {connecting ? "Connecting..." : "Connect Wallet"}
-                </button>
-              )}
-            </div>
+              </div>
+            ) : (
+              <button
+                onClick={connect}
+                disabled={connecting}
+                className="btn"
+              >
+                {connecting ? "Connecting..." : "Connect Wallet"}
+              </button>
+            )}
           </div>
         </div>
-      )}
-    </nav>
+      </nav>
+
+      {/* Tabs below navbar */}
+      <div className="sticky top-[64px] z-40 bg-[var(--color-background)] border-b border-[var(--color-border)] flex items-center px-2 md:px-12 overflow-x-auto min-h-[56px] shadow-sm">
+        <div className="flex gap-2 md:gap-4 w-full py-2">
+          <Link href="/markets" className="group relative px-4 py-1.5 rounded-full font-semibold text-sm text-white">
+            <span className="relative z-10">Markets</span>
+            <span className="absolute inset-0 rounded-full bg-[var(--color-accent2)] opacity-0 group-hover:opacity-100 transition-opacity duration-200 -z-1" />
+          </Link>
+          <Link href="/trending" className="group relative px-4 py-1.5 rounded-full font-semibold text-sm text-white">
+            <span className="relative z-10">Trending</span>
+            <span className="absolute inset-0 rounded-full bg-[var(--color-card)] border border-[var(--color-accent2)]/30 opacity-0 group-hover:opacity-100 transition-opacity duration-200 -z-1" />
+          </Link>
+          <Link href="/new" className="group relative px-4 py-1.5 rounded-full font-semibold text-sm text-white">
+            <span className="relative z-10">New</span>
+            <span className="absolute inset-0 rounded-full bg-[var(--color-card)] border border-[var(--color-accent2)]/30 opacity-0 group-hover:opacity-100 transition-opacity duration-200 -z-1" />
+          </Link>
+          <Link href="/sports" className="group relative px-4 py-1.5 rounded-full font-semibold text-sm text-white">
+            <span className="relative z-10">Sports</span>
+            <span className="absolute inset-0 rounded-full bg-[var(--color-accent2)] opacity-0 group-hover:opacity-100 transition-opacity duration-200 -z-1" />
+          </Link>
+          <Link href="/politics" className="group relative px-4 py-1.5 rounded-full font-semibold text-sm text-[var(--color-foreground)]">
+            <span className="relative z-10">Politics</span>
+            <span className="absolute inset-0 rounded-full bg-[var(--color-card)] border border-[var(--color-border)] opacity-0 group-hover:opacity-100 transition-opacity duration-200 -z-1" />
+          </Link>
+          <Link href="/crypto" className="group relative px-4 py-1.5 rounded-full font-semibold text-sm text-[var(--color-foreground)]">
+            <span className="relative z-10">Crypto</span>
+            <span className="absolute inset-0 rounded-full bg-[var(--color-card)] border border-[var(--color-border)] opacity-0 group-hover:opacity-100 transition-opacity duration-200 -z-1" />
+          </Link>
+          <Link href="/esports" className="group relative px-4 py-1.5 rounded-full font-semibold text-sm text-[var(--color-foreground)]">
+            <span className="relative z-10">Esports</span>
+            <span className="absolute inset-0 rounded-full bg-[var(--color-card)] border border-[var(--color-border)] opacity-0 group-hover:opacity-100 transition-opacity duration-200 -z-1" />
+          </Link>
+          <Link href="/finance" className="group relative px-4 py-1.5 rounded-full font-semibold text-sm text-[var(--color-foreground)]">
+            <span className="relative z-10">Finance</span>
+            <span className="absolute inset-0 rounded-full bg-[var(--color-card)] border border-[var(--color-border)] opacity-0 group-hover:opacity-100 transition-opacity duration-200 -z-1" />
+          </Link>
+          <Link href="/economy" className="group relative px-4 py-1.5 rounded-full font-semibold text-sm text-[var(--color-foreground)]">
+            <span className="relative z-10">Economy</span>
+            <span className="absolute inset-0 rounded-full bg-[var(--color-card)] border border-[var(--color-border)] opacity-0 group-hover:opacity-100 transition-opacity duration-200 -z-1" />
+          </Link>
+          <Link href="/culture" className="group relative px-4 py-1.5 rounded-full font-semibold text-sm text-[var(--color-foreground)]">
+            <span className="relative z-10">Culture</span>
+            <span className="absolute inset-0 rounded-full bg-[var(--color-card)] border border-[var(--color-border)] opacity-0 group-hover:opacity-100 transition-opacity duration-200 -z-1" />
+          </Link>
+          <Link href="/more" className="group relative px-4 py-1.5 rounded-full font-semibold text-sm text-[var(--color-foreground)]">
+            <span className="relative z-10">More <span className='ml-1'>▼</span></span>
+            <span className="absolute inset-0 rounded-full bg-[var(--color-card)] border border-[var(--color-border)] opacity-0 group-hover:opacity-100 transition-opacity duration-200 -z-1" />
+          </Link>
+        </div>
+      </div>
+    </>
   );
 }
+// ...existing code...
+// All wallet, connect, disconnect, and mobile menu code removed for predict.fun style
+// Only keep the new navbar code above

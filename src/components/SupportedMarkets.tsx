@@ -118,30 +118,30 @@ const sports = [
 
 export default function SupportedMarkets() {
   return (
-    <section className="py-12 md:py-20 px-4">
+    <section className="py-14 md:py-24 px-4 bg-[var(--color-background)]">
       <div className="max-w-6xl mx-auto">
-        <h2 className="text-center text-xl md:text-2xl font-bold tracking-widest mb-3">SUPPORTED MARKETS</h2>
-        <p className="text-center text-gray-400 mb-8 md:mb-14 max-w-lg mx-auto text-sm md:text-base">
+        <h2 className="text-center text-[var(--color-accent2)] text-2xl md:text-3xl font-extrabold tracking-tight mb-4 uppercase drop-shadow-lg">Supported Markets</h2>
+        <p className="text-center text-muted mb-10 md:mb-16 max-w-lg mx-auto text-base md:text-lg">
           Trade on hundreds of events across sports and esports — all powered by Azuro&apos;s decentralized oracle network
         </p>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 md:gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-5 md:gap-7">
           {sports.map((sport) => (
             <div
               key={sport.name}
-              className={`bg-[#0c1428] border ${sport.color} rounded-xl p-4 md:p-6 text-center transition-all group cursor-default`}
+              className={`bg-[var(--color-card)] border ${sport.color} rounded-[var(--radius-lg)] p-5 md:p-7 text-center transition-all group cursor-default shadow-sm hover:shadow-lg`}
             >
               <div className="flex justify-center mb-3">{sport.icon}</div>
-              <h3 className="text-white font-semibold text-sm mb-1">{sport.name}</h3>
-              <p className="text-xs text-gray-500">{sport.markets} events</p>
+              <h3 className="text-[var(--color-foreground)] font-semibold text-base mb-1">{sport.name}</h3>
+              <p className="text-xs text-muted">{sport.markets} events</p>
             </div>
           ))}
         </div>
 
-        <div className="text-center mt-10">
+        <div className="text-center mt-12">
           <Link
             href="/markets"
-            className="inline-block px-8 py-3 bg-gradient-to-r from-[#1e40af] to-[#3b82f6] text-white font-semibold rounded-lg hover:from-[#1d4ed8] hover:to-[#60a5fa] transition-all shadow-lg shadow-blue-500/25"
+            className="btn px-8 py-3 text-base font-semibold"
           >
             Explore All Markets
           </Link>

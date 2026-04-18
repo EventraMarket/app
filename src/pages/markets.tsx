@@ -1,9 +1,8 @@
 import { useState } from "react";
 import { Geist } from "next/font/google";
-import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import { useGames } from "@azuro-org/sdk";
-import { formatDate } from "@/lib/rain";
+import MarketCard from "@/components/MarketCard";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -38,7 +37,6 @@ export default function MarketsPage() {
   return (
     <div className={`${geistSans.className} min-h-screen bg-[#060a14] text-white`}>
       <Navbar />
-
       <main className="pt-20 md:pt-24 pb-16 px-4 max-w-7xl mx-auto">
         {/* Page header */}
         <div className="mb-6 md:mb-8">
@@ -60,7 +58,6 @@ export default function MarketsPage() {
               className="w-full pl-10 pr-4 py-2.5 bg-[#111d3a] border border-[#1e3a5f] rounded-lg text-sm text-white placeholder-gray-500 focus:outline-none focus:border-[#3b82f6] transition-colors"
             />
           </div>
-
           <div className="flex items-center gap-2">
             {(["all", "upcoming", "live"] as StatusFilter[]).map((s) => (
               <button
@@ -78,95 +75,20 @@ export default function MarketsPage() {
           </div>
         </div>
 
-        {/* Table */}
-        <div className="bg-[#0c1428] border border-[#1e3a5f] rounded-xl overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-[#1e3a5f] text-left">
-                  <th className="px-3 md:px-6 py-3 md:py-4 text-xs font-semibold text-gray-400 uppercase tracking-wider w-12">#</th>
-                  <th className="px-3 md:px-6 py-3 md:py-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">Event</th>
-                  <th className="hidden sm:table-cell px-3 md:px-6 py-3 md:py-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">Sport</th>
-                  <th className="hidden md:table-cell px-3 md:px-6 py-3 md:py-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">League</th>
-                  <th className="px-3 md:px-6 py-3 md:py-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">Status</th>
-                  <th className="hidden sm:table-cell px-3 md:px-6 py-3 md:py-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">Starts At</th>
-                  <th className="px-3 md:px-6 py-3 md:py-4 text-xs font-semibold text-gray-400 uppercase tracking-wider text-right">Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {isFetching && games.length === 0 && (
-                  <>
-                    {[1, 2, 3, 4, 5].map((i) => (
-                      <tr key={i} className="border-b border-[#1e3a5f]/50 animate-pulse">
-                        <td className="px-6 py-5"><div className="h-4 w-6 bg-[#1e3a5f] rounded" /></td>
-                        <td className="px-6 py-5"><div className="h-4 w-64 bg-[#1e3a5f] rounded" /></td>
-                        <td className="px-6 py-5"><div className="h-4 w-20 bg-[#1e3a5f] rounded" /></td>
-                        <td className="px-6 py-5"><div className="h-4 w-20 bg-[#1e3a5f] rounded" /></td>
-                        <td className="px-6 py-5"><div className="h-5 w-20 bg-[#1e3a5f] rounded" /></td>
-                        <td className="px-6 py-5"><div className="h-4 w-32 bg-[#1e3a5f] rounded" /></td>
-                        <td className="px-6 py-5"><div className="h-8 w-20 bg-[#1e3a5f] rounded ml-auto" /></td>
-                      </tr>
-                    ))}
-                  </>
-                )}
-                {!isFetching && filtered.length === 0 && (
-                  <tr>
-                    <td colSpan={7} className="px-6 py-16 text-center text-gray-500">
-                      No markets found matching your criteria.
-                    </td>
-                  </tr>
-                )}
-                {filtered.map((game, idx) => {
-                  const isLive = Number(game.startsAt) * 1000 < Date.now();
-                  const title = game.title || game.participants.map((p) => p.name).join(" vs ");
-
-                  return (
-                    <tr
-                      key={game.gameId}
-                      className="border-b border-[#1e3a5f]/50 hover:bg-[#111d3a]/60 transition-colors group"
-                    >
-                      <td className="px-3 md:px-6 py-4 md:py-5 text-sm text-gray-500">{(page - 1) * 20 + idx + 1}</td>
-                      <td className="px-3 md:px-6 py-4 md:py-5">
-                        <Link href={`/market/${game.gameId}`} className="text-sm font-medium text-white group-hover:text-[#3b82f6] transition-colors">
-                          {title}
-                        </Link>
-                      </td>
-                      <td className="hidden sm:table-cell px-3 md:px-6 py-4 md:py-5">
-                        <span className="text-sm text-gray-300">{game.sport?.name}</span>
-                      </td>
-                      <td className="hidden md:table-cell px-3 md:px-6 py-4 md:py-5">
-                        <span className="text-sm text-gray-400">{game.league?.name}</span>
-                      </td>
-                      <td className="px-3 md:px-6 py-4 md:py-5">
-                        <span
-                          className={`inline-flex px-2.5 py-1 text-[10px] font-semibold rounded-full border ${
-                            isLive
-                              ? "text-green-400 border-green-400/30 bg-green-400/10"
-                              : "text-yellow-400 border-yellow-400/30 bg-yellow-400/10"
-                          }`}
-                        >
-                          {isLive ? "Live" : "Upcoming"}
-                        </span>
-                      </td>
-                      <td className="hidden sm:table-cell px-3 md:px-6 py-4 md:py-5">
-                        <span className="text-sm text-gray-300">
-                          {formatDate(Number(game.startsAt))}
-                        </span>
-                      </td>
-                      <td className="px-3 md:px-6 py-4 md:py-5 text-right">
-                        <Link
-                          href={`/market/${game.gameId}`}
-                          className="px-4 py-2 bg-gradient-to-r from-[#1e40af] to-[#3b82f6] text-white text-xs font-semibold rounded-lg hover:from-[#1d4ed8] hover:to-[#60a5fa] transition-all shadow-lg shadow-blue-500/20 inline-block"
-                        >
-                          Trade
-                        </Link>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+        {/* Card grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-8">
+          {isFetching && games.length === 0 &&
+            [1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+              <div key={i} className="card animate-pulse p-6 h-56" />
+            ))}
+          {!isFetching && filtered.length === 0 && (
+            <div className="col-span-full text-center text-muted py-16">
+              No markets found matching your criteria.
+            </div>
+          )}
+          {filtered.map((game) => (
+            <MarketCard key={game.gameId} game={game} />
+          ))}
         </div>
 
         {/* Pagination */}
@@ -196,4 +118,6 @@ export default function MarketsPage() {
       </main>
     </div>
   );
+
+// ...existing code...
 }
