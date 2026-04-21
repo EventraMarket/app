@@ -9,7 +9,7 @@ const geistSans = Geist({
 
 export default function CreateMarketPage() {
   return (
-    <div className={`${geistSans.className} min-h-screen bg-[#060a14] text-white`}>
+    <div className={`${geistSans.className} min-h-screen text-white`}>
       <Navbar />
 
       <main className="pt-20 md:pt-24 pb-16 px-4 max-w-3xl mx-auto">

@@ -1,17 +1,17 @@
 @import "tailwindcss";
 
 @theme inline {
-  --color-background: #0b0e13;
-  --color-foreground: #f7f7fa;
-  --color-card: #181c23;
-  --color-accent: #00e1c6;
-  --color-accent2: #2e7fff;
-  --color-border: #23262f;
-  --color-muted: #8a8fa3;
-  --color-success: #00e1c6;
-  --color-danger: #ff4d4f;
-  --color-warning: #ffb800;
-  --color-info: #2e7fff;
+  --color-background: #DED5A8;
+  --color-foreground: #000000;
+  --color-card: #000000;
+  --color-accent: #D9A650;
+  --color-accent2: #F3B21A;
+  --color-border: #D9A650;
+  --color-muted: #D9A650;
+  --color-success: #F3B21A;
+  --color-danger: #D9A650;
+  --color-warning: #F3B21A;
+  --color-info: #DED5A8;
   --font-sans: 'Inter', 'Geist', 'Segoe UI', Arial, sans-serif;
   --font-mono: 'Geist Mono', 'Fira Mono', 'Menlo', monospace;
   --radius-lg: 18px;
@@ -25,7 +25,7 @@
   }
 
   body {
-    background: var(--color-background);
+    background: linear-gradient(120deg, #DED5A8 0%, #F3B21A 30%, #D9A650 100%);
     color: var(--color-foreground);
     font-family: var(--font-sans);
     min-height: 100vh;
@@ -35,43 +35,44 @@
   }
 
   a {
-    color: var(--color-accent2);
+    color: var(--color-accent);
     text-decoration: none;
     transition: color 0.2s;
   }
   a:hover {
-    color: var(--color-accent);
+    color: var(--color-card);
   }
 
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #000;
+    color: #f7f7fa;
+  }
+  th, td {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid #DED5A8;
+    text-align: left;
+  }
+  th {
+    background: #f3b21a;
+    color: #000;
+    font-weight: 700;
+  }
   .card {
     background: var(--color-card);
     border-radius: var(--radius-lg);
-    border: 1px solid var(--color-border);
+    border: 2px solid #DED5A8;
     box-shadow: 0 2px 16px 0 rgba(0,0,0,0.10);
-    padding: 1.5rem;
+    padding: 1rem;
     transition: box-shadow 0.2s;
+    color: #f7f7fa;
   }
-  .card:hover {
-    box-shadow: 0 4px 32px 0 rgba(46,127,255,0.10);
+  @media (min-width: 640px) {
+    .card {
+      padding: 1.5rem;
+    }
   }
-
-  .btn {
-    background: linear-gradient(90deg, var(--color-accent2), var(--color-accent));
-    color: #fff;
-    border: none;
-    border-radius: var(--radius-md);
-    padding: 0.75rem 1.5rem;
-    font-weight: 600;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: background 0.2s, box-shadow 0.2s;
-    box-shadow: 0 2px 8px 0 rgba(46,127,255,0.10);
-  }
-  .btn:hover {
-    background: linear-gradient(90deg, var(--color-accent), var(--color-accent2));
-    box-shadow: 0 4px 16px 0 rgba(0,225,198,0.10);
-  }
-
   .text-muted {
     color: var(--color-muted);
   }
