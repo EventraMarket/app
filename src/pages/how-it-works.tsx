@@ -104,7 +104,7 @@ export default function HowItWorksPage() {
             {steps.map((step, i) => (
               <div key={step.number} className="relative flex items-start gap-8 group">
                 {/* Step number circle */}
-                <div className="relative z-10 flex-shrink-0 w-16 h-16 rounded-full bg-gradient-to-br from-[#1e40af] to-[#3b82f6] flex items-center justify-center shadow-lg shadow-blue-500/20 group-hover:shadow-blue-500/40 transition-shadow">
+                <div className="relative z-10 flex-shrink-0 w-16 h-16 rounded-full bg-gradient-to-br from-[var(--color-accent)] to-[var(--color-accent2)] flex items-center justify-center shadow-lg shadow-[var(--color-accent2)]/20 group-hover:shadow-[var(--color-accent2)]/40 transition-shadow">
                   <span className="text-white font-bold text-sm">{step.number}</span>
                 </div>
 
@@ -152,7 +152,7 @@ export default function HowItWorksPage() {
             <p className="text-gray-400 mb-8 max-w-lg mx-auto">
               Join thousands of traders making predictions on the world&apos;s biggest events.
             </p>
-            <Link href="/markets" className="inline-block px-10 py-3 bg-gradient-to-r from-[#1e40af] to-[#3b82f6] text-white font-semibold rounded-lg hover:from-[#1d4ed8] hover:to-[#60a5fa] transition-all shadow-lg shadow-blue-500/25">
+            <Link href="/markets" className="inline-block px-10 py-3 bg-gradient-to-r from-[var(--color-accent)] to-[var(--color-accent2)] text-black font-semibold rounded-lg hover:from-[var(--color-accent2)] hover:to-[var(--color-accent)] transition-all shadow-lg shadow-[var(--color-accent2)]/25">
               Start Trading Now
             </Link>
           </div>

@@ -17,7 +17,7 @@ export default function CTASection() {
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
               <Link
                 href="/markets"
-                className="w-full sm:w-auto px-10 py-3 bg-gradient-to-r from-[#1e40af] to-[#3b82f6] text-white font-semibold rounded-lg hover:from-[#1d4ed8] hover:to-[#60a5fa] transition-all shadow-lg shadow-blue-500/25 text-center"
+                className="w-full sm:w-auto px-10 py-3 bg-gradient-to-r from-[var(--color-accent)] to-[var(--color-accent2)] text-black font-semibold rounded-lg hover:from-[var(--color-accent2)] hover:to-[var(--color-accent)] transition-all shadow-lg shadow-[var(--color-accent2)]/25 text-center"
               >
                 Browse Markets
               </Link>

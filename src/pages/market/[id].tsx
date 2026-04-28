@@ -106,7 +106,7 @@ export default function MarketDetailPage() {
       <main className="pt-20 md:pt-24 pb-16 px-4 max-w-5xl mx-auto">
         {/* Breadcrumb */}
         <div className="flex items-center gap-2 text-sm text-gray-500 mb-6">
-          <Link href="/markets" className="hover:text-[#3b82f6] transition-colors">
+          <Link href="/markets" className="hover:text-[var(--color-accent2)] transition-colors">
             Markets
           </Link>
           <span>/</span>
@@ -165,7 +165,7 @@ export default function MarketDetailPage() {
                 { label: "Starts At", value: formatDate(Number(game.startsAt)) },
                 { label: "Turnover", value: game.turnover ? `$${parseFloat(game.turnover).toFixed(2)}` : "$0.00" },
               ].map((stat) => (
-                <div key={stat.label} className="bg-[#0c1428] border border-[#1e3a5f] rounded-xl p-4">
+                <div key={stat.label} className="bg-[var(--color-card)] border border-[var(--color-accent2)] rounded-xl p-4">
                   <p className="text-xs text-gray-500 mb-1">{stat.label}</p>
                   <p className="text-sm font-semibold text-white">{stat.value}</p>
                 </div>
@@ -174,18 +174,18 @@ export default function MarketDetailPage() {
 
             {/* Participants */}
             {game.participants && game.participants.length >= 2 && (
-              <div className="bg-[#0c1428] border border-[#1e3a5f] rounded-xl p-4 md:p-6 mb-8">
+              <div className="bg-[var(--color-card)] border border-[var(--color-accent2)] rounded-xl p-4 md:p-6 mb-8">
                 <div className="flex items-center justify-around gap-2">
                   <div className="text-center">
                     {game.participants[0]?.image && (
-                      <img src={game.participants[0].image} alt="" className="w-16 h-16 rounded-full mx-auto mb-2 bg-[#111d3a]" />
+                      <img src={game.participants[0]?.image} alt="" className="w-16 h-16 rounded-full mx-auto mb-2 bg-[var(--color-card)]" />
                     )}
                     <p className="font-bold text-lg">{game.participants[0]?.name}</p>
                   </div>
                   <span className="text-2xl font-bold text-gray-600">VS</span>
                   <div className="text-center">
                     {game.participants[1]?.image && (
-                      <img src={game.participants[1].image} alt="" className="w-16 h-16 rounded-full mx-auto mb-2 bg-[#111d3a]" />
+                      <img src={game.participants[1]?.image} alt="" className="w-16 h-16 rounded-full mx-auto mb-2 bg-[var(--color-card)]" />
                     )}
                     <p className="font-bold text-lg">{game.participants[1]?.name}</p>
                   </div>
@@ -214,7 +214,7 @@ export default function MarketDetailPage() {
               {conditions && conditions.map((condition) => (
                 <div
                   key={condition.conditionId}
-                  className="bg-[#0c1428] border border-[#1e3a5f] rounded-xl p-5 mb-4"
+                  className="bg-[var(--color-card)] border border-[var(--color-accent2)] rounded-xl p-5 mb-4"
                 >
                   <div className="flex items-center justify-between mb-4">
                     <span className="text-xs text-gray-500 font-mono">
@@ -249,14 +249,14 @@ export default function MarketDetailPage() {
                           disabled={condition.state !== "Active"}
                           className={`p-4 rounded-xl border text-left transition-all ${
                             isSelected
-                              ? "border-[#3b82f6] bg-[#3b82f6]/10 shadow-lg shadow-blue-500/10"
-                              : "border-[#1e3a5f] hover:border-[#3b82f6]/40"
+                              ? "border-[var(--color-accent2)] bg-[var(--color-accent2)]/10 shadow-lg shadow-[var(--color-accent2)]/10"
+                              : "border-[var(--color-accent2)] hover:border-[var(--color-accent2)]/40"
                           } disabled:opacity-40 disabled:cursor-not-allowed`}
                         >
                           <p className="text-xs text-gray-400 mb-1 truncate">
                             {outcome.title || `Outcome ${outcome.outcomeId}`}
                           </p>
-                          <p className="text-xl font-bold text-[#3b82f6]">
+                          <p className="text-xl font-bold text-[var(--color-accent2)]">
                             {oddsValue.toFixed(2)}
                           </p>
                         </button>
@@ -268,7 +268,7 @@ export default function MarketDetailPage() {
             </div>
 
             {/* Trade Panel */}
-            <div className="bg-[#0c1428] border border-[#1e3a5f] rounded-xl p-6 mb-8">
+            <div className="bg-[var(--color-card)] border border-[var(--color-accent2)] rounded-xl p-6 mb-8">
               <h2 className="text-lg font-bold mb-4">Place Trade</h2>
 
               {!isConnected ? (
@@ -277,7 +277,7 @@ export default function MarketDetailPage() {
                   <button
                     onClick={connect}
                     disabled={connecting}
-                    className="px-6 py-2.5 bg-gradient-to-r from-[#1e40af] to-[#3b82f6] text-white font-semibold rounded-lg hover:from-[#1d4ed8] hover:to-[#60a5fa] transition-all disabled:opacity-50 text-sm"
+                    className="px-6 py-2.5 bg-gradient-to-r from-[var(--color-accent)] to-[var(--color-accent2)] text-black font-semibold rounded-lg hover:from-[var(--color-accent2)] hover:to-[var(--color-accent)] transition-all disabled:opacity-50 text-sm"
                   >
                     {connecting ? "Connecting..." : "Connect Wallet"}
                   </button>
@@ -291,12 +291,12 @@ export default function MarketDetailPage() {
 
                   {selected ? (
                     <>
-                      <div className="bg-[#111d3a] border border-[#1e3a5f] rounded-lg px-4 py-3">
+                      <div className="bg-[var(--color-card)] border border-[var(--color-accent2)] rounded-lg px-4 py-3">
                         <p className="text-xs text-gray-500 mb-1">Selected Outcome</p>
                         <p className="text-sm font-semibold">
                           Condition #{selected.conditionId.slice(-8)} → Outcome {selected.outcomeId}
                         </p>
-                        <p className="text-xs text-[#3b82f6] mt-1">
+                        <p className="text-xs text-[var(--color-accent2)] mt-1">
                           Odds: {totalOdds > 0 ? totalOdds.toFixed(2) : "Calculating..."}
                         </p>
                       </div>
@@ -309,7 +309,7 @@ export default function MarketDetailPage() {
                           onChange={(e) => setBetAmount(e.target.value)}
                           min={0.1}
                           step={0.1}
-                          className="w-full px-4 py-2.5 bg-[#111d3a] border border-[#1e3a5f] rounded-lg text-white text-sm focus:outline-none focus:border-[#3b82f6] transition-colors"
+                          className="w-full px-4 py-2.5 bg-[var(--color-card)] border border-[var(--color-accent2)] rounded-lg text-white text-sm focus:outline-none focus:border-[var(--color-accent2)] transition-colors"
                         />
                         {totalOdds > 0 && parseFloat(betAmount) > 0 && (
                           <p className="text-xs text-gray-500 mt-1">
@@ -321,7 +321,7 @@ export default function MarketDetailPage() {
                       <button
                         onClick={submit}
                         disabled={isBetting || isAllowanceLoading || !totalOdds}
-                        className="w-full py-3 bg-gradient-to-r from-[#1e40af] to-[#3b82f6] text-white font-bold rounded-lg hover:from-[#1d4ed8] hover:to-[#60a5fa] transition-all shadow-lg shadow-blue-500/25 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="w-full py-3 bg-gradient-to-r from-[var(--color-accent)] to-[var(--color-accent2)] text-black font-bold rounded-lg hover:from-[var(--color-accent2)] hover:to-[var(--color-accent)] transition-all shadow-lg shadow-[var(--color-accent2)]/25 disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         {isAllowanceLoading
                           ? "Checking allowance..."
@@ -350,7 +350,7 @@ export default function MarketDetailPage() {
             </div>
 
             {/* Game info */}
-            <div className="bg-[#0c1428] border border-[#1e3a5f] rounded-xl p-6">
+            <div className="bg-[var(--color-card)] border border-[var(--color-accent2)] rounded-xl p-6">
               <h2 className="text-lg font-bold mb-4">Game Details</h2>
               <div className="space-y-3">
                 <div className="flex items-center justify-between">

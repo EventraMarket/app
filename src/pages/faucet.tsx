@@ -153,9 +153,9 @@ export default function FaucetPage() {
         </div>
 
         {/* Faucet Card */}
-        <div className="bg-[#0c1428] border border-[#1e3a5f] rounded-2xl p-8">
+        <div className="bg-[var(--color-card)] border border-[var(--color-accent2)] rounded-2xl p-8">
           {/* Token Info */}
-          <div className="flex items-center justify-between mb-8 pb-6 border-b border-[#1e3a5f]">
+          <div className="flex items-center justify-between mb-8 pb-6 border-b border-[var(--color-accent2)]">
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 rounded-full bg-[#22c55e]/10 border border-[#22c55e]/30 flex items-center justify-center">
                 <span className="text-lg font-bold text-[#22c55e]">$</span>
@@ -167,13 +167,13 @@ export default function FaucetPage() {
             </div>
             <div className="text-right">
               <p className="text-xs text-gray-500 mb-1">Amount per claim</p>
-              <p className="text-xl font-bold text-[#3b82f6]">{MINT_AMOUNT} {tokenSymbol}</p>
+              <p className="text-xl font-bold text-[var(--color-accent2)]">{MINT_AMOUNT} {tokenSymbol}</p>
             </div>
           </div>
 
           {/* Balance Display */}
           {isConnected && (
-            <div className="bg-[#111d3a] border border-[#1e3a5f] rounded-xl p-4 mb-6">
+            <div className="bg-[var(--color-card)] border border-[var(--color-accent2)] rounded-xl p-4 mb-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-xs text-gray-500 mb-1">Your Balance</p>
@@ -198,7 +198,7 @@ export default function FaucetPage() {
               <button
                 onClick={connect}
                 disabled={connecting}
-                className="px-8 py-3 bg-gradient-to-r from-[#1e40af] to-[#3b82f6] text-white font-semibold rounded-lg hover:from-[#1d4ed8] hover:to-[#60a5fa] transition-all shadow-lg shadow-blue-500/25 disabled:opacity-50"
+                className="px-8 py-3 bg-gradient-to-r from-[var(--color-accent)] to-[var(--color-accent2)] text-black font-semibold rounded-lg hover:from-[var(--color-accent2)] hover:to-[var(--color-accent)] transition-all shadow-lg shadow-[var(--color-accent2)]/25 disabled:opacity-50"
               >
                 {connecting ? "Connecting..." : "Connect Wallet"}
               </button>
@@ -208,7 +208,7 @@ export default function FaucetPage() {
               <button
                 onClick={handleMint}
                 disabled={minting}
-                className="w-full py-3.5 bg-gradient-to-r from-[#1e40af] to-[#3b82f6] text-white font-bold rounded-lg hover:from-[#1d4ed8] hover:to-[#60a5fa] transition-all shadow-lg shadow-blue-500/25 disabled:opacity-50 disabled:cursor-not-allowed text-lg"
+                className="w-full py-3.5 bg-gradient-to-r from-[var(--color-accent)] to-[var(--color-accent2)] text-black font-bold rounded-lg hover:from-[var(--color-accent2)] hover:to-[var(--color-accent)] transition-all shadow-lg shadow-[var(--color-accent2)]/25 disabled:opacity-50 disabled:cursor-not-allowed text-lg"
               >
                 {minting ? (
                   <span className="flex items-center justify-center gap-2">
@@ -252,13 +252,13 @@ export default function FaucetPage() {
           )}
 
           {/* Contract Info */}
-          <div className="mt-8 pt-6 border-t border-[#1e3a5f]">
+          <div className="mt-8 pt-6 border-t border-[var(--color-accent2)]">
             <p className="text-xs text-gray-500 mb-2">Contract Address</p>
             <a
               href={`https://amoy.polygonscan.com/address/${FAUCET_CONTRACT}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-xs font-mono text-[#3b82f6] hover:text-[#60a5fa] transition-colors break-all"
+              className="text-xs font-mono text-[var(--color-accent2)] hover:text-[var(--color-accent)] transition-colors break-all"
             >
               {FAUCET_CONTRACT}
             </a>
@@ -267,7 +267,7 @@ export default function FaucetPage() {
 
         {/* Info Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8">
-          <div className="bg-[#0c1428] border border-[#1e3a5f] rounded-xl p-5">
+          <div className="bg-[var(--color-card)] border border-[var(--color-accent2)] rounded-xl p-5">
             <h3 className="text-sm font-semibold text-white mb-2">Need Testnet MATIC?</h3>
             <p className="text-xs text-gray-400 leading-relaxed">
               You need a small amount of MATIC for gas fees. Get free testnet MATIC from the{" "}
@@ -275,17 +275,17 @@ export default function FaucetPage() {
                 href="https://faucet.polygon.technology/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-[#3b82f6] hover:text-[#60a5fa] underline"
+                className="text-[var(--color-accent2)] hover:text-[var(--color-accent)] underline"
               >
                 Polygon Faucet
               </a>.
             </p>
           </div>
-          <div className="bg-[#0c1428] border border-[#1e3a5f] rounded-xl p-5">
+          <div className="bg-[var(--color-card)] border border-[var(--color-accent2)] rounded-xl p-5">
             <h3 className="text-sm font-semibold text-white mb-2">What can I do with {tokenSymbol}?</h3>
             <p className="text-xs text-gray-400 leading-relaxed">
               Use your testnet {tokenSymbol} to trade on prediction markets.{" "}
-              <Link href="/markets" className="text-[#3b82f6] hover:text-[#60a5fa] underline">
+              <Link href="/markets" className="text-[var(--color-accent2)] hover:text-[var(--color-accent)] underline">
                 Browse markets
               </Link>{" "}
               and start making predictions.

@@ -10,16 +10,22 @@ interface GameCardProps {
     league: { name: string };
     participants: { name: string; image?: string | null }[];
   };
+  highlight?: boolean;
 }
 
-export default function MarketCard({ game }: GameCardProps) {
+
+export default function MarketCard({ game, highlight }: GameCardProps) {
   const isLive = Number(game.startsAt) * 1000 < Date.now();
 
   return (
-    <div className="card relative flex flex-col gap-4 group transition-shadow transform-gpu duration-200 hover:scale-[1.03] hover:shadow-2xl">
+    <Link
+      href={`/market/${game.gameId}`}
+      className={`card relative flex flex-col gap-3 group transition-shadow transform-gpu duration-200 hover:scale-[1.03] hover:shadow-2xl aspect-[2.5/1] min-h-[120px] max-h-[170px] mic-effect${highlight ? ' mic-effect-highlight' : ''}`}
+      style={{ textDecoration: 'none' }}
+    >
       <div className="absolute inset-0 rounded-[var(--radius-lg)] bg-gradient-to-b from-[var(--color-accent2)]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
 
-      <div className="relative z-10 flex flex-col gap-4">
+      <div className="relative z-10 flex flex-col h-full justify-between gap-2">
         {/* Status + Sport badge */}
         <div className="flex items-center gap-2">
           <span
@@ -34,21 +40,14 @@ export default function MarketCard({ game }: GameCardProps) {
           <span className="text-xs text-muted">{game.sport.name}</span>
         </div>
 
-        {/* Game title / participants */}
-        <h3 className="text-[var(--color-foreground)] font-semibold text-base leading-snug min-h-[48px]">
-          {game.title ||
-            game.participants.map((p) => p.name).join(" vs ")}
+        {/* Game title */}
+        <h3 className="text-[var(--color-foreground)] font-semibold text-base leading-snug min-h-[32px]">
+          {game.title || game.participants.map((p) => p.name).join(" vs ")}
         </h3>
 
-        {/* League + time */}
-        <div className="flex items-center justify-between text-xs text-muted">
-          <span>{game.league.name}</span>
-          <span>{formatDate(Number(game.startsAt))}</span>
-        </div>
-
-        {/* Participants */}
+        {/* Participants (teams) inside the card, below the button */}
         {game.participants.length >= 2 && (
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 mt-2">
             <div className="flex-1 bg-[var(--color-background)] rounded-[var(--radius-md)] px-3 py-2 border border-[var(--color-border)] text-center">
               <span className="text-sm font-semibold text-[var(--color-foreground)]">
                 {game.participants[0]?.name}
@@ -63,14 +62,13 @@ export default function MarketCard({ game }: GameCardProps) {
           </div>
         )}
 
-        {/* Trade Now button */}
-        <Link
-          href={`/market/${game.gameId}`}
-          className="mt-2 w-full btn text-center block"
-        >
-          Trade Now
-        </Link>
+        {/* League + time */}
+        <div className="flex items-center justify-between text-xs text-muted mt-auto">
+          <span>{game.league.name}</span>
+          <span>{formatDate(Number(game.startsAt))}</span>
+        </div>
+
       </div>
-    </div>
+    </Link>
   );
 }

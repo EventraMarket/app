@@ -32,7 +32,7 @@ export default function MobileTabBar() {
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md border-t border-gray-200 flex md:hidden justify-around items-center py-2 px-2 shadow-lg">
       {navItems.map((item) => (
-        <Link key={item.href} href={item.href} className="flex flex-col items-center text-xs font-medium text-gray-600 hover:text-blue-600 transition-colors">
+        <Link key={item.href} href={item.href} className="flex flex-col items-center text-xs font-medium text-gray-600 hover:text-[var(--color-accent2)] transition-colors">
           <span className="w-8 h-8 flex items-center justify-center mb-0.5">
             {item.icon}
           </span>

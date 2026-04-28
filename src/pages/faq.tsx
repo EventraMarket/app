@@ -185,7 +185,7 @@ export default function FAQPage() {
                 href="https://discord.gg/azuro"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="px-6 py-2.5 bg-gradient-to-r from-[#1e40af] to-[#3b82f6] text-white text-sm font-semibold rounded-lg hover:from-[#1d4ed8] hover:to-[#60a5fa] transition-all shadow-lg shadow-blue-500/20"
+                className="px-6 py-2.5 bg-gradient-to-r from-[var(--color-accent)] to-[var(--color-accent2)] text-black text-sm font-semibold rounded-lg hover:from-[var(--color-accent2)] hover:to-[var(--color-accent)] transition-all shadow-lg shadow-[var(--color-accent2)]/20"
               >
                 Join Discord
               </a>

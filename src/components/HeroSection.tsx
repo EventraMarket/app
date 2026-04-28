@@ -33,7 +33,7 @@ export default function HeroSection() {
 
         {/* CTA Buttons */}
         <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 w-full sm:w-auto">
-          <Link href="/markets" className="w-full sm:w-auto px-8 py-3 bg-gradient-to-r from-[#1e40af] to-[#3b82f6] text-white font-semibold rounded-lg hover:from-[#1d4ed8] hover:to-[#60a5fa] transition-all shadow-lg shadow-blue-500/25 text-center">
+          <Link href="/markets" className="w-full sm:w-auto px-8 py-3 bg-gradient-to-r from-[var(--color-accent)] to-[var(--color-accent2)] text-black font-semibold rounded-lg hover:from-[var(--color-accent2)] hover:to-[var(--color-accent)] transition-all shadow-lg shadow-[var(--color-accent2)]/25 text-center">
             Start Trading
           </Link>
           <Link href="/how-it-works" className="w-full sm:w-auto px-8 py-3 border border-gray-500 text-gray-300 font-semibold rounded-lg hover:bg-white/5 transition-colors text-center">

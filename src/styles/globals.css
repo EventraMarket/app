@@ -1,3 +1,34 @@
+.mic-effect-highlight::after {
+  border-image: none;
+  border: 2.5px solid var(--color-accent2);
+  box-shadow: 0 0 0 2px var(--color-accent2), 0 0 16px 2px var(--color-accent2);
+  animation: mic-glow 1.2s alternate infinite;
+}
+@keyframes mic-glow {
+  0% { box-shadow: 0 0 0 2px var(--color-accent2), 0 0 8px 2px var(--color-accent2); }
+  100% { box-shadow: 0 0 0 2px var(--color-accent2), 0 0 24px 4px var(--color-accent2); }
+}
+/* Mic waveform animated border effect */
+.mic-effect {
+  position: relative;
+  overflow: visible;
+}
+.mic-effect::after {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  inset: -4px;
+  border-radius: var(--radius-lg);
+  border: 3px solid;
+  border-image: repeating-linear-gradient(90deg, var(--color-accent2) 0 10px, transparent 10px 20px) 1;
+  animation: mic-wave 1.5s linear infinite;
+  z-index: 2;
+}
+@keyframes mic-wave {
+  0% { border-image-slice: 1; border-image-width: 1; filter: drop-shadow(0 0 2px var(--color-accent2)); }
+  50% { border-image-slice: 1; border-image-width: 1; filter: drop-shadow(0 0 8px var(--color-accent2)); }
+  100% { border-image-slice: 1; border-image-width: 1; filter: drop-shadow(0 0 2px var(--color-accent2)); }
+}
 @import "tailwindcss";
 
 @theme inline {

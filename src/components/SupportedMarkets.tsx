@@ -106,7 +106,7 @@ function LoLIcon() {
 }
 
 const sports = [
-  { name: "Football", icon: <FootballIcon />, markets: "200+", color: "border-blue-500/30 hover:border-blue-500/60" },
+  { name: "Football", icon: <FootballIcon />, markets: "200+", color: "border-[var(--color-accent2)]/30 hover:border-[var(--color-accent2)]/60" },
   { name: "Basketball", icon: <BasketballIcon />, markets: "150+", color: "border-orange-500/30 hover:border-orange-500/60" },
   { name: "Tennis", icon: <TennisIcon />, markets: "120+", color: "border-green-500/30 hover:border-green-500/60" },
   { name: "MMA / UFC", icon: <MMAIcon />, markets: "50+", color: "border-red-500/30 hover:border-red-500/60" },

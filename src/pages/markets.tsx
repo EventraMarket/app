@@ -83,7 +83,7 @@ export default function MarketsPage() {
         </div>
 
         {/* Card grid */}
-        <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-5 md:gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 md:gap-3">
           {isFetching && games.length === 0 &&
             [1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
               <div key={i} className="card animate-pulse h-44 sm:h-56" />
@@ -93,8 +93,8 @@ export default function MarketsPage() {
               No markets found matching your criteria.
             </div>
           )}
-          {filtered.map((game) => (
-            <MarketCard key={game.gameId} game={game} />
+          {filtered.map((game, idx) => (
+            <MarketCard key={game.gameId} game={game} highlight={idx === 0} />
           ))}
         </div>
 
