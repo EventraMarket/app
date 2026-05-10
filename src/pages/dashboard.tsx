@@ -10,11 +10,11 @@ import { CONTRACT_ADDRESSES, USDC_ABI } from "@/lib/contracts";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 
-function StatCard({ label, value, sub }: { label: string; value: string; sub?: string }) {
+function StatCard({ label, value, sub, mono }: { label: string; value: string; sub?: string; mono?: boolean }) {
   return (
-    <div className="bg-black border border-[#D9A650]/50 rounded-xl p-5">
+    <div className="bg-black border border-[#D9A650]/50 rounded-xl p-5 min-w-0">
       <p className="text-xs text-[#D9A650]/80 mb-1">{label}</p>
-      <p className="text-2xl font-bold text-white">{value}</p>
+      <p className={mono ? "font-mono text-sm font-semibold text-white break-all" : "text-2xl font-bold text-white"}>{value}</p>
       {sub && <p className="text-xs text-[#D9A650]/80 mt-1">{sub}</p>}
     </div>
   );
@@ -177,8 +177,9 @@ export default function DashboardPage() {
               />
               <StatCard
                 label="Address"
-                value={`${address.slice(0, 6)}...${address.slice(-4)}`}
+                value={address}
                 sub="Base Sepolia"
+                mono
               />
             </div>
           </section>
