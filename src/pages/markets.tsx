@@ -1,9 +1,8 @@
 import { useState } from "react";
 import { Geist } from "next/font/google";
 import TopNavbar from "@/components/TopNavbar";
-import CategoryNavbar from "@/components/CategoryNavbar";
 import BannerSection from "@/components/BannerSection";
-import { useGames } from "@azuro-org/sdk";
+import { useMarkets } from "@/lib/useMarkets";
 import MarketCard from "@/components/MarketCard";
 
 const geistSans = Geist({
@@ -13,16 +12,15 @@ const geistSans = Geist({
 
 type StatusFilter = "all" | "upcoming" | "live";
 
+const CATEGORIES = ["All", "Politics", "Sports", "Crypto", "Finance", "Culture", "Esports", "Economy", "Other"];
+
 export default function MarketsPage() {
   const [page, setPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [search, setSearch] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("All");
 
-  const { data, isFetching } = useGames({
-    perPage: 20,
-    page,
-    isLive: statusFilter === "live" ? true : undefined,
-  });
+  const { data, isFetching } = useMarkets(page, 20);
 
   const games = data?.games ?? [];
   const totalPages = data?.totalPages ?? 1;
@@ -30,16 +28,17 @@ export default function MarketsPage() {
   const filtered = games.filter((g) => {
     const title = g.title || g.participants.map((p) => p.name).join(" vs ");
     const matchesSearch = title.toLowerCase().includes(search.toLowerCase());
+    const gameCategory = g.category ?? g.sport.name;
+    const matchesCategory = categoryFilter === "All" || gameCategory === categoryFilter;
     if (statusFilter === "upcoming") {
-      return matchesSearch && Number(g.startsAt) * 1000 > Date.now();
+      return matchesSearch && matchesCategory && Number(g.startsAt) * 1000 > Date.now();
     }
-    return matchesSearch;
+    return matchesSearch && matchesCategory;
   });
 
   return (
     <div className={`${geistSans.className} min-h-screen text-white`}>
       <TopNavbar />
-      <CategoryNavbar />
       <BannerSection />
 
       <main className="pt-6 md:pt-12 pb-20 px-2 sm:px-4 max-w-7xl mx-auto">
@@ -47,6 +46,23 @@ export default function MarketsPage() {
         <div className="mb-4 md:mb-8 px-1 sm:px-0">
           <h1 className="text-xl sm:text-2xl md:text-3xl font-bold mb-1 sm:mb-2">All Markets</h1>
           <p className="text-gray-400 text-sm sm:text-base">Browse and trade on prediction markets on Eventra</p>
+        </div>
+
+        {/* Category tabs */}
+        <div className="flex gap-2 overflow-x-auto pb-2 mb-4 scrollbar-hide">
+          {CATEGORIES.map((cat) => (
+            <button
+              key={cat}
+              onClick={() => { setCategoryFilter(cat); setPage(1); }}
+              className={`px-4 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all focus:outline-none ${
+                categoryFilter === cat
+                  ? "bg-[#F3B21A] text-black shadow"
+                  : "bg-black/80 border border-[#D9A650]/30 text-[#D9A650]/70 hover:border-[#F3B21A]/60 hover:text-[#F3B21A]"
+              }`}
+            >
+              {cat}
+            </button>
+          ))}
         </div>
 
         {/* Filters bar */}
@@ -99,27 +115,27 @@ export default function MarketsPage() {
         </div>
 
         {/* Pagination */}
-        <div className="mt-4 flex items-center justify-between text-xs text-gray-500">
+        <div className="mt-4 flex items-center justify-between text-xs text-[#D9A650]/80">
           <span>Page {page} of {totalPages} ({data?.total ?? 0} events)</span>
           <div className="flex gap-2">
             <button
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page <= 1}
-              className="px-3 py-1.5 bg-[#111d3a] border border-[#1e3a5f] rounded text-gray-400 hover:text-white disabled:opacity-30"
+              className="px-3 py-1.5 bg-black/80 border border-[#D9A650]/50 rounded text-[#D9A650] hover:text-white disabled:opacity-30"
             >
               Prev
             </button>
             <button
               onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
               disabled={page >= totalPages}
-              className="px-3 py-1.5 bg-[#111d3a] border border-[#1e3a5f] rounded text-gray-400 hover:text-white disabled:opacity-30"
+              className="px-3 py-1.5 bg-black/80 border border-[#D9A650]/50 rounded text-[#D9A650] hover:text-white disabled:opacity-30"
             >
               Next
             </button>
           </div>
         </div>
 
-        <div className="mt-2 text-right text-xs text-gray-600">
+        <div className="mt-2 text-right text-xs text-[#D9A650]/60">
           Eventra on Polygon Amoy Testnet
         </div>
       </main>

@@ -44,6 +44,8 @@ export default function TopNavbar() {
               </svg>
             </button>
             <Link href="/markets" className="text-black font-medium text-lg hover:text-yellow-600 w-full text-center py-2 rounded transition" onClick={() => setMenuOpen(false)}>Markets</Link>
+            <Link href="/dashboard" className="text-black font-medium text-lg hover:text-yellow-600 w-full text-center py-2 rounded transition" onClick={() => setMenuOpen(false)}>Dashboard</Link>
+            <Link href="/create" className="text-black font-medium text-lg hover:text-yellow-600 w-full text-center py-2 rounded transition" onClick={() => setMenuOpen(false)}>Create Market</Link>
             <Link href="/how-it-works" className="text-black font-medium text-lg hover:text-yellow-600 w-full text-center py-2 rounded transition" onClick={() => setMenuOpen(false)}>How It Works</Link>
             <Link href="/faq" className="text-black font-medium text-lg hover:text-yellow-600 w-full text-center py-2 rounded transition" onClick={() => setMenuOpen(false)}>FAQ</Link>
             <Link href="/faucet" className="text-black font-medium text-lg hover:text-yellow-600 w-full text-center py-2 rounded transition" onClick={() => setMenuOpen(false)}>Faucet</Link>
@@ -76,6 +78,8 @@ export default function TopNavbar() {
       {/* Desktop nav links and wallet actions */}
       <div className="hidden sm:flex flex-row items-center gap-6 ml-auto">
         <Link href="/markets" className="text-black font-medium text-base hover:text-yellow-600">Markets</Link>
+        <Link href="/dashboard" className="text-black font-medium text-base hover:text-yellow-600">Dashboard</Link>
+        <Link href="/create" className="text-black font-bold text-base bg-yellow-400 hover:bg-yellow-500 text-black px-3 py-1 rounded-lg transition">+ Create</Link>
         <Link href="/how-it-works" className="text-black font-medium text-base hover:text-yellow-600">How It Works</Link>
         <Link href="/faq" className="text-black font-medium text-base hover:text-yellow-600">FAQ</Link>
         <Link href="/faucet" className="text-black font-medium text-base hover:text-yellow-600">Faucet</Link>

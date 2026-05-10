@@ -1,14 +1,14 @@
-import { useChain } from "@azuro-org/sdk";
+import { useChainId } from "wagmi";
 
 export default function ProtocolStats() {
-  const { appChain, betToken } = useChain();
+  const chainId = useChainId();
 
   const items = [
-    { label: "Network", value: appChain.name },
-    { label: "Bet Token", value: betToken.symbol },
-    { label: "Chain ID", value: appChain.id.toString() },
+    { label: "Network", value: "Polygon Amoy" },
+    { label: "Bet Token", value: "USDC" },
+    { label: "Chain ID", value: chainId.toString() },
     { label: "Environment", value: "Testnet" },
-    { label: "Protocol", value: "Azuro" },
+    { label: "Protocol", value: "CTF" },
   ];
 
   return (
@@ -18,10 +18,10 @@ export default function ProtocolStats() {
           {items.map((item) => (
             <div
               key={item.label}
-              className="bg-[#0c1428] border border-[#1e3a5f] rounded-xl p-4 md:p-5 text-center hover:border-[#3b82f6]/30 transition-colors"
+              className="bg-black border border-[#D9A650]/50 rounded-xl p-4 md:p-5 text-center hover:border-[#F3B21A]/30 transition-colors"
             >
               <p className="text-lg md:text-2xl font-bold text-white mb-1">{item.value}</p>
-              <p className="text-[10px] md:text-xs text-gray-500">{item.label}</p>
+              <p className="text-[10px] md:text-xs text-[#D9A650]">{item.label}</p>
             </div>
           ))}
         </div>

@@ -48,7 +48,7 @@ export default function HowItWorksPreview() {
     <section className="py-12 md:py-20 px-4">
       <div className="max-w-6xl mx-auto">
         <h2 className="text-center text-xl md:text-2xl font-bold tracking-widest mb-3">HOW IT WORKS</h2>
-        <p className="text-center text-gray-400 mb-8 md:mb-14 max-w-lg mx-auto text-sm md:text-base">
+        <p className="text-center text-[#D9A650] mb-8 md:mb-14 max-w-lg mx-auto text-sm md:text-base">
           Four simple steps to start trading on prediction markets
         </p>
 
@@ -56,14 +56,14 @@ export default function HowItWorksPreview() {
           {steps.map((step) => (
             <div
               key={step.number}
-              className="relative bg-[#0c1428] border border-[#1e3a5f] rounded-xl p-6 hover:border-[#3b82f6]/40 transition-colors group"
+              className="relative bg-black border border-[#D9A650]/50 rounded-xl p-6 hover:border-[#F3B21A]/40 transition-colors group"
             >
-              <div className="absolute -top-3 -left-2 text-[#3b82f6]/20 text-5xl font-black select-none">
+              <div className="absolute -top-3 -left-2 text-[#F3B21A]/20 text-5xl font-black select-none">
                 {step.number}
               </div>
-              <div className="text-[#3b82f6] mb-4 mt-2">{step.icon}</div>
+              <div className="text-[#F3B21A] mb-4 mt-2">{step.icon}</div>
               <h3 className="text-white font-semibold mb-2">{step.title}</h3>
-              <p className="text-gray-400 text-sm leading-relaxed">{step.description}</p>
+              <p className="text-[#D9A650] text-sm leading-relaxed">{step.description}</p>
             </div>
           ))}
         </div>
@@ -71,7 +71,7 @@ export default function HowItWorksPreview() {
         <div className="text-center mt-10">
           <Link
             href="/how-it-works"
-            className="text-[#3b82f6] hover:text-[#60a5fa] text-sm font-medium transition-colors"
+            className="text-[#F3B21A] hover:text-[#D9A650] text-sm font-medium transition-colors"
           >
             Read the full guide &rarr;
           </Link>

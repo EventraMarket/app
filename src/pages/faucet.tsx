@@ -5,52 +5,29 @@ import Navbar from "@/components/Navbar";
 import { useWallet } from "@/context/WalletContext";
 import { usePublicClient, useWalletClient } from "wagmi";
 import { parseUnits, formatUnits } from "viem";
+import { CONTRACT_ADDRESSES, USDC_ABI } from "@/lib/contracts";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
 });
 
-const FAUCET_CONTRACT = "0xCf1b86ceD971b88C042C64A9c099377e2738073C" as const;
-const MINT_AMOUNT = "100"; // 100 USDT per claim
+const FAUCET_CONTRACT = CONTRACT_ADDRESSES.USDC;
+const TOKEN_CONTRACT = CONTRACT_ADDRESSES.USDC;
+const FAUCET_AMOUNT = parseUnits("100", 6); // 1,000 mUSDC per claim
 
-const FAUCET_ABI = [
-  {
-    inputs: [{ internalType: "uint256", name: "amount", type: "uint256" }],
-    name: "mint",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [{ internalType: "address", name: "account", type: "address" }],
-    name: "balanceOf",
-    outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "decimals",
-    outputs: [{ internalType: "uint8", name: "", type: "uint8" }],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "symbol",
-    outputs: [{ internalType: "string", name: "", type: "string" }],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "name",
-    outputs: [{ internalType: "string", name: "", type: "string" }],
-    stateMutability: "view",
-    type: "function",
-  },
-] as const;
+// const FAUCET_ABI = [
+//   {
+//     inputs: [
+//       { internalType: "address", name: "to", type: "address" },
+//       { internalType: "uint256", name: "amount", type: "uint256" },
+//     ],
+//     name: "faucet",
+//     outputs: [],
+//     stateMutability: "nonpayable",
+//     type: "function",
+//   },
+// ] as const;
 
 export default function FaucetPage() {
   const { address, isConnected, connecting, connect } = useWallet();
@@ -73,25 +50,25 @@ export default function FaucetPage() {
       try {
         const [dec, sym, bal] = await Promise.all([
           publicClient!.readContract({
-            address: FAUCET_CONTRACT,
-            abi: FAUCET_ABI,
+            address: TOKEN_CONTRACT as `0x${string}`,
+            abi: USDC_ABI,
             functionName: "decimals",
           }),
           publicClient!.readContract({
-            address: FAUCET_CONTRACT,
-            abi: FAUCET_ABI,
+            address: TOKEN_CONTRACT as `0x${string}`,
+            abi: USDC_ABI,
             functionName: "symbol",
           }),
           publicClient!.readContract({
-            address: FAUCET_CONTRACT,
-            abi: FAUCET_ABI,
+            address: TOKEN_CONTRACT as `0x${string}`,
+            abi: USDC_ABI,
             functionName: "balanceOf",
             args: [address as `0x${string}`],
           }),
         ]);
-        setDecimals(dec);
-        setTokenSymbol(sym);
-        setBalance(formatUnits(bal, dec));
+        setDecimals(dec as number);
+        setTokenSymbol(sym as string);
+        setBalance(formatUnits(bal as bigint, dec as number));
       } catch (err) {
         console.error("Failed to fetch token info:", err);
       }
@@ -109,13 +86,11 @@ export default function FaucetPage() {
     setTxHash(null);
 
     try {
-      const amount = parseUnits(MINT_AMOUNT, decimals);
-
       const hash = await walletClient.writeContract({
         address: FAUCET_CONTRACT,
-        abi: FAUCET_ABI,
-        functionName: "mint",
-        args: [amount],
+        abi: USDC_ABI,
+        functionName: "faucet",
+        args: [address as `0x${string}`, FAUCET_AMOUNT],
       });
 
       setTxHash(hash);
@@ -167,7 +142,7 @@ export default function FaucetPage() {
             </div>
             <div className="text-right">
               <p className="text-xs text-gray-500 mb-1">Amount per claim</p>
-              <p className="text-xl font-bold text-[var(--color-accent2)]">{MINT_AMOUNT} {tokenSymbol}</p>
+              <p className="text-xl font-bold text-[var(--color-accent2)]">{formatUnits(FAUCET_AMOUNT, 6)} {tokenSymbol}</p>
             </div>
           </div>
 
@@ -219,7 +194,7 @@ export default function FaucetPage() {
                     Minting...
                   </span>
                 ) : (
-                  `Claim ${MINT_AMOUNT} ${tokenSymbol}`
+                  `Claim ${formatUnits(FAUCET_AMOUNT, 6)} ${tokenSymbol}`
                 )}
               </button>
 
@@ -227,7 +202,7 @@ export default function FaucetPage() {
               {mintSuccess && (
                 <div className="mt-4 bg-green-500/10 border border-green-500/30 rounded-lg px-4 py-3">
                   <p className="text-sm text-green-400 font-medium">
-                    Successfully minted {MINT_AMOUNT} {tokenSymbol}!
+                    Successfully minted {formatUnits(FAUCET_AMOUNT, 6)} {tokenSymbol}!
                   </p>
                   {txHash && (
                     <a

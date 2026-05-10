@@ -106,8 +106,8 @@ export default function FAQPage() {
             onClick={() => { setActiveCategory("all"); setOpenIndex(null); }}
             className={`px-5 py-2 rounded-full text-sm font-medium transition-colors ${
               activeCategory === "all"
-                ? "bg-[#3b82f6] text-white"
-                : "bg-[#111d3a] text-gray-400 border border-[#1e3a5f] hover:text-white"
+                ? "bg-[#F3B21A] text-black"
+                : "bg-black/80 text-[#D9A650] border border-[#D9A650]/50 hover:text-white"
             }`}
           >
             All
@@ -118,8 +118,8 @@ export default function FAQPage() {
               onClick={() => { setActiveCategory(cat); setOpenIndex(null); }}
               className={`px-5 py-2 rounded-full text-sm font-medium transition-colors ${
                 activeCategory === cat
-                  ? "bg-[#3b82f6] text-white"
-                  : "bg-[#111d3a] text-gray-400 border border-[#1e3a5f] hover:text-white"
+                  ? "bg-[#F3B21A] text-black"
+                  : "bg-black/80 text-[#D9A650] border border-[#D9A650]/50 hover:text-white"
               }`}
             >
               {cat}
@@ -134,22 +134,22 @@ export default function FAQPage() {
             return (
               <div
                 key={idx}
-                className={`bg-[#0c1428] border rounded-xl overflow-hidden transition-colors ${
-                  isOpen ? "border-[#3b82f6]/50" : "border-[#1e3a5f]"
+                className={`bg-black border rounded-xl overflow-hidden transition-colors ${
+                  isOpen ? "border-[#F3B21A]/50" : "border-[#D9A650]/50"
                 }`}
               >
                 <button
                   onClick={() => setOpenIndex(isOpen ? null : idx)}
-                  className="w-full flex items-center justify-between px-6 py-5 text-left hover:bg-[#111d3a]/50 transition-colors"
+                  className="w-full flex items-center justify-between px-6 py-5 text-left hover:bg-black/50 transition-colors"
                 >
                   <div className="flex items-center gap-3">
-                    <span className="text-[10px] text-gray-500 bg-[#1e3a5f]/50 px-2 py-0.5 rounded-full">
+                    <span className="text-[10px] text-[#D9A650]/80 bg-[#D9A650]/10 px-2 py-0.5 rounded-full">
                       {faq.category}
                     </span>
                     <span className="text-sm font-medium text-white">{faq.question}</span>
                   </div>
                   <svg
-                    className={`w-5 h-5 text-gray-400 flex-shrink-0 transition-transform duration-200 ${
+                    className={`w-5 h-5 text-[#D9A650] flex-shrink-0 transition-transform duration-200 ${
                       isOpen ? "rotate-180" : ""
                     }`}
                     fill="none"
@@ -164,7 +164,7 @@ export default function FAQPage() {
                     isOpen ? "max-h-96" : "max-h-0"
                   }`}
                 >
-                  <div className="px-6 pb-5 pt-0 text-gray-400 text-sm leading-relaxed border-t border-[#1e3a5f]/50">
+                  <div className="px-6 pb-5 pt-0 text-[#D9A650] text-sm leading-relaxed border-t border-[#D9A650]/30">
                     <p className="pt-4">{faq.answer}</p>
                   </div>
                 </div>

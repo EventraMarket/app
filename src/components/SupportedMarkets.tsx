@@ -4,16 +4,16 @@ import Link from "next/link";
 function FootballIcon() {
   return (
     <svg viewBox="0 0 64 64" className="w-12 h-12" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="32" cy="32" r="28" fill="#1a1a2e" stroke="#3b82f6" strokeWidth="2" />
-      <path d="M32 4a28 28 0 100 56 28 28 0 000-56z" fill="none" stroke="#3b82f6" strokeWidth="1" opacity="0.3" />
-      <polygon points="32,18 38,24 36,32 28,32 26,24" fill="#3b82f6" opacity="0.7" />
-      <line x1="32" y1="18" x2="32" y2="8" stroke="#3b82f6" strokeWidth="1.5" opacity="0.5" />
-      <line x1="38" y1="24" x2="48" y2="18" stroke="#3b82f6" strokeWidth="1.5" opacity="0.5" />
-      <line x1="36" y1="32" x2="46" y2="38" stroke="#3b82f6" strokeWidth="1.5" opacity="0.5" />
-      <line x1="28" y1="32" x2="18" y2="38" stroke="#3b82f6" strokeWidth="1.5" opacity="0.5" />
-      <line x1="26" y1="24" x2="16" y2="18" stroke="#3b82f6" strokeWidth="1.5" opacity="0.5" />
-      <circle cx="32" cy="32" r="28" fill="none" stroke="#3b82f6" strokeWidth="2" />
-      <line x1="4" y1="32" x2="60" y2="32" stroke="#3b82f6" strokeWidth="1" opacity="0.2" />
+      <circle cx="32" cy="32" r="28" fill="#000" stroke="#F3B21A" strokeWidth="2" />
+      <path d="M32 4a28 28 0 100 56 28 28 0 000-56z" fill="none" stroke="#F3B21A" strokeWidth="1" opacity="0.3" />
+      <polygon points="32,18 38,24 36,32 28,32 26,24" fill="#F3B21A" opacity="0.7" />
+      <line x1="32" y1="18" x2="32" y2="8" stroke="#F3B21A" strokeWidth="1.5" opacity="0.5" />
+      <line x1="38" y1="24" x2="48" y2="18" stroke="#F3B21A" strokeWidth="1.5" opacity="0.5" />
+      <line x1="36" y1="32" x2="46" y2="38" stroke="#F3B21A" strokeWidth="1.5" opacity="0.5" />
+      <line x1="28" y1="32" x2="18" y2="38" stroke="#F3B21A" strokeWidth="1.5" opacity="0.5" />
+      <line x1="26" y1="24" x2="16" y2="18" stroke="#F3B21A" strokeWidth="1.5" opacity="0.5" />
+      <circle cx="32" cy="32" r="28" fill="none" stroke="#F3B21A" strokeWidth="2" />
+      <line x1="4" y1="32" x2="60" y2="32" stroke="#F3B21A" strokeWidth="1" opacity="0.2" />
     </svg>
   );
 }

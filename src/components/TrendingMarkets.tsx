@@ -1,8 +1,8 @@
 import MarketCard from "./MarketCard";
-import { useGames } from "@azuro-org/sdk";
+import { useMarkets } from "@/lib/useMarkets";
 
 export default function TrendingMarkets() {
-  const { data, isFetching } = useGames({ perPage: 3 });
+  const { data, isFetching } = useMarkets(1, 3);
 
   const games = data?.games ?? [];
 
@@ -14,29 +14,15 @@ export default function TrendingMarkets() {
           Trending Markets
         </h2>
 
-        {/* Loading skeleton */}
-        {isFetching && games.length === 0 && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-8">
-            {[1, 2, 3].map((i) => (
-              <div
-                key={i}
-                className="card animate-pulse p-6 flex flex-col gap-4"
-              >
-                <div className="h-4 bg-[var(--color-border)] rounded w-24 mb-4" />
-                <div className="h-5 bg-[var(--color-border)] rounded w-full mb-2" />
-                <div className="h-5 bg-[var(--color-border)] rounded w-3/4 mb-6" />
-                <div className="flex gap-3 mb-6">
-                  <div className="h-10 bg-[var(--color-border)] rounded flex-1" />
-                  <div className="h-10 bg-[var(--color-border)] rounded flex-1" />
-                </div>
-                <div className="h-10 bg-[var(--color-border)] rounded" />
-              </div>
-            ))}
+        {/* Loading spinner */}
+        {isFetching && (
+          <div className="flex justify-center py-12">
+            <div className="w-8 h-8 border-2 border-[#F3B21A] border-t-transparent rounded-full animate-spin" />
           </div>
         )}
 
         {/* Market cards grid */}
-        {games.length > 0 && (
+        {!isFetching && games.length > 0 && (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-8">
             {games.map((game) => (
               <MarketCard key={game.gameId} game={game} />

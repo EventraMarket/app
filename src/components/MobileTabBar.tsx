@@ -22,8 +22,8 @@ const icons = {
 
 const navItems = [
   { href: "/markets", label: "Markets", icon: icons.markets },
-  { href: "/trending", label: "Trending", icon: icons.points },
-  { href: "/new", label: "New", icon: icons.search },
+  { href: "/dashboard", label: "Dashboard", icon: icons.points },
+  { href: "/create", label: "Create", icon: icons.search },
   { href: "/faucet", label: "Faucet", icon: icons.user },
 ];
 

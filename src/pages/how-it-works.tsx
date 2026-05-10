@@ -83,14 +83,14 @@ const features = [
 
 export default function HowItWorksPage() {
   return (
-    <div className={`${geistSans.className} min-h-screen bg-[#060a14] text-white`}>
+    <div className={`${geistSans.className} min-h-screen bg-transparent text-white`}>
       <Navbar />
 
       <main className="pt-20 md:pt-24 pb-20 px-4 max-w-5xl mx-auto">
         {/* Header */}
         <div className="text-center mb-16">
           <h1 className="text-4xl font-bold mb-4">How It Works</h1>
-          <p className="text-gray-400 text-lg max-w-2xl mx-auto">
+          <p className="text-[#D9A650] text-lg max-w-2xl mx-auto">
             Prediction markets let you trade on the outcome of future events. Here&apos;s how to get started in four simple steps.
           </p>
         </div>
@@ -98,7 +98,7 @@ export default function HowItWorksPage() {
         {/* Steps */}
         <div className="relative">
           {/* Connector line */}
-          <div className="absolute left-8 top-0 bottom-0 w-px bg-gradient-to-b from-[#3b82f6] via-[#1e3a5f] to-transparent hidden md:block" />
+          <div className="absolute left-8 top-0 bottom-0 w-px bg-gradient-to-b from-[#F3B21A] via-[#D9A650] to-transparent hidden md:block" />
 
           <div className="space-y-12">
             {steps.map((step, i) => (
@@ -109,17 +109,17 @@ export default function HowItWorksPage() {
                 </div>
 
                 {/* Content card */}
-                <div className="flex-1 bg-[#0c1428] border border-[#1e3a5f] rounded-xl p-6 hover:border-[#3b82f6]/40 transition-colors">
+                <div className="flex-1 bg-black border border-[#D9A650]/50 rounded-xl p-6 hover:border-[#F3B21A]/40 transition-colors">
                   <div className="flex items-center gap-3 mb-3">
-                    <div className="text-[#3b82f6]">{step.icon}</div>
+                    <div className="text-[#F3B21A]">{step.icon}</div>
                     <h3 className="text-xl font-bold text-white">{step.title}</h3>
                   </div>
-                  <p className="text-gray-400 leading-relaxed">{step.description}</p>
+                  <p className="text-[#D9A650] leading-relaxed">{step.description}</p>
                 </div>
 
                 {/* Connector dot */}
                 {i < steps.length - 1 && (
-                  <div className="absolute left-8 -bottom-6 w-px h-12 bg-[#1e3a5f] hidden md:block" />
+                  <div className="absolute left-8 -bottom-6 w-px h-12 bg-[#D9A650]/50 hidden md:block" />
                 )}
               </div>
             ))}
@@ -133,13 +133,13 @@ export default function HowItWorksPage() {
             {features.map((feat) => (
               <div
                 key={feat.title}
-                className="bg-[#0c1428] border border-[#1e3a5f] rounded-xl p-6 hover:border-[#3b82f6]/40 transition-colors group"
+                className="bg-black border border-[#D9A650]/50 rounded-xl p-6 hover:border-[#F3B21A]/40 transition-colors group"
               >
-                <div className="w-10 h-10 rounded-lg bg-[#3b82f6]/10 flex items-center justify-center mb-4 group-hover:bg-[#3b82f6]/20 transition-colors">
-                  <div className="w-2.5 h-2.5 rounded-full bg-[#3b82f6]" />
+                <div className="w-10 h-10 rounded-lg bg-[#F3B21A]/10 flex items-center justify-center mb-4 group-hover:bg-[#F3B21A]/20 transition-colors">
+                  <div className="w-2.5 h-2.5 rounded-full bg-[#F3B21A]" />
                 </div>
                 <h3 className="text-white font-semibold mb-2">{feat.title}</h3>
-                <p className="text-gray-400 text-sm leading-relaxed">{feat.description}</p>
+                <p className="text-[#D9A650] text-sm leading-relaxed">{feat.description}</p>
               </div>
             ))}
           </div>
@@ -147,9 +147,9 @@ export default function HowItWorksPage() {
 
         {/* CTA */}
         <div className="mt-20 text-center">
-          <div className="bg-gradient-to-r from-[#111d3a] to-[#0c1428] border border-[#1e3a5f] rounded-2xl p-12">
+          <div className="bg-black border border-[#D9A650]/50 rounded-2xl p-12">
             <h2 className="text-2xl font-bold mb-4">Ready to Start?</h2>
-            <p className="text-gray-400 mb-8 max-w-lg mx-auto">
+            <p className="text-[#D9A650] mb-8 max-w-lg mx-auto">
               Join thousands of traders making predictions on the world&apos;s biggest events.
             </p>
             <Link href="/markets" className="inline-block px-10 py-3 bg-gradient-to-r from-[var(--color-accent)] to-[var(--color-accent2)] text-black font-semibold rounded-lg hover:from-[var(--color-accent2)] hover:to-[var(--color-accent)] transition-all shadow-lg shadow-[var(--color-accent2)]/25">
