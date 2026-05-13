@@ -263,10 +263,10 @@ export default function CreateMarketPage() {
             </div>
 
             {/* Info box */}
-            <div className="bg-yellow-400/5 border border-yellow-400/20 rounded-xl p-4 text-xs text-yellow-300 space-y-1">
-              <p><strong>Resolver:</strong> <span className="font-mono break-all">{CONTRACT_ADDRESSES.SIMPLE_RESOLVER}</span></p>
-              <p><strong>ConditionalTokens:</strong> <span className="font-mono break-all">{CONTRACT_ADDRESSES.CONDITIONAL_TOKEN}</span></p>
-              <p className="text-[#D9A650] pt-1">After creating, go to your Dashboard to resolve it once the event happens.</p>
+            <div className="bg-black border border-[#D9A650]/50 rounded-xl p-4 text-xs space-y-1.5">
+              <p className="text-white"><strong className="text-[#F3B21A]">Resolver:</strong> <span className="font-mono break-all text-[#D9A650]">{CONTRACT_ADDRESSES.SIMPLE_RESOLVER}</span></p>
+              <p className="text-white"><strong className="text-[#F3B21A]">ConditionalTokens:</strong> <span className="font-mono break-all text-[#D9A650]">{CONTRACT_ADDRESSES.CONDITIONAL_TOKEN}</span></p>
+              <p className="text-white/70 pt-1 border-t border-[#D9A650]/20">After creating, go to your Dashboard to resolve it once the event happens.</p>
             </div>
 
             {error && (

@@ -20,7 +20,7 @@ export default function MarketsPage() {
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("All");
 
-  const { data, isFetching } = useMarkets(page, 20);
+  const { data, isFetching } = useMarkets(page, 50);
 
   const games = data?.games ?? [];
   const totalPages = data?.totalPages ?? 1;
@@ -45,7 +45,7 @@ export default function MarketsPage() {
         {/* Page header */}
         <div className="mb-4 md:mb-8 px-1 sm:px-0">
           <h1 className="text-xl sm:text-2xl md:text-3xl font-bold mb-1 sm:mb-2">All Markets</h1>
-          <p className="text-gray-400 text-sm sm:text-base">Browse and trade on prediction markets on Eventra</p>
+          <p className="text-black/70 text-sm sm:text-base font-medium">Browse and trade on prediction markets on Eventra</p>
         </div>
 
         {/* Category tabs */}

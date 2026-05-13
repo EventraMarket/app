@@ -1,0 +1,22 @@
+[
+  {
+    "address": "0xEEF67b57658136d874D2384106A151226bB8c854",
+    "privateKey": "0x111ae9eff0a08c4ac6acb6819299999a0d9052950761dd1dcc6413589ff6f3b5"
+  },
+  {
+    "address": "0xF8D61d6F71362cc4414D2a9ceD3A1fBc717b5A93",
+    "privateKey": "0xf67be7721722b0132a73d370738425baa644a62f1015574dc3501ed30a5d9a3e"
+  },
+  {
+    "address": "0x85d4702ba5AB62Df3B8379Cd1FAc4E4656724290",
+    "privateKey": "0xd501529ba93dacd08ed7110d52156399b900e4dd8b962c15ea77327d6ca95d4a"
+  },
+  {
+    "address": "0xACa675566571C8F576C737DB64E98C0513D9bbdA",
+    "privateKey": "0xf6258087f869ef1bdba0782e2e2527dd7d58637221db3dbad92e5a5bd32afa2b"
+  },
+  {
+    "address": "0x9707ecdA237b04dC5eD803d5c333E9c3082C8253",
+    "privateKey": "0x14236e2345c46fc01a3b8898172883701ea6cd28c06de526dc20f41dce6cc67d"
+  }
+]

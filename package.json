@@ -5,7 +5,13 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "seed": "node scripts/seed-markets.mjs",
+    "seed:watch": "nodemon --watch scripts/seed-markets.mjs --exec \"node scripts/seed-markets.mjs --dry-run\"",
+    "sim": "node scripts/sim-traders.mjs",
+    "sim:dry": "node scripts/sim-traders.mjs --dry-run",
+    "sim:users": "node scripts/sim-users.mjs",
+    "sim:users:dry": "node scripts/sim-users.mjs --dry-run"
   },
   "dependencies": {
     "@account-kit/infra": "^4.87.0",
@@ -26,6 +32,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "nodemon": "^3.1.14",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

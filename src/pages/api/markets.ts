@@ -19,7 +19,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (resolved === "false") filter.resolved = false;
 
     const pageNum = Math.max(1, parseInt(page as string, 10));
-    const limitNum = Math.min(50, parseInt(limit as string, 10));
+    const limitNum = Math.min(100, parseInt(limit as string, 10));
 
     const [markets, total] = await Promise.all([
       Market.find(filter)

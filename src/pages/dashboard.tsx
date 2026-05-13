@@ -33,8 +33,30 @@ export default function DashboardPage() {
   const [analytics, setAnalytics] = useState<AnalyticsResponse | null>(null);
   const [loadingAnalytics, setLoadingAnalytics] = useState(false);
   const [usdcBalance, setUsdcBalance] = useState<string>("0");
-  const [tab, setTab] = useState<"overview" | "markets" | "activity">("overview");
+  const [tab, setTab] = useState<"history" | "markets" | "activity">("history");
   const [isAdmin, setIsAdmin] = useState(false);
+  const [historyTxs, setHistoryTxs] = useState<{
+    txHash: string; type: string; wallet: string;
+    conditionId: string | null; amount: string; blockNumber: number; timestamp: string;
+  }[]>([]);
+  const [loadingHistory, setLoadingHistory] = useState(false);
+  const [historyPage, setHistoryPage] = useState(1);
+  const [historyTotal, setHistoryTotal] = useState(0);
+
+  const fetchHistory = useCallback(async (page = 1) => {
+    setLoadingHistory(true);
+    try {
+      const res = await fetch(`/api/transactions?limit=20&page=${page}`);
+      const data = await res.json();
+      setHistoryTxs(data.transactions ?? []);
+      setHistoryTotal(data.total ?? 0);
+      setHistoryPage(page);
+    } catch {
+      // silently fail
+    } finally {
+      setLoadingHistory(false);
+    }
+  }, []);
 
   const fetchAnalytics = useCallback(async () => {
     setLoadingAnalytics(true);
@@ -81,7 +103,8 @@ export default function DashboardPage() {
 
   useEffect(() => {
     fetchAnalytics();
-  }, [fetchAnalytics]);
+    fetchHistory(1);
+  }, [fetchAnalytics, fetchHistory]);
 
   useEffect(() => {
     if (isConnected) { fetchUsdcBalance(); checkAdmin(); }
@@ -98,7 +121,7 @@ export default function DashboardPage() {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold">Dashboard</h1>
-            <p className="text-[#D9A650] text-sm mt-1">Protocol analytics &amp; wallet activity — Base Sepolia</p>
+            <p className="text-black/70 text-sm mt-1 font-medium">Protocol analytics &amp; wallet activity — Base Sepolia</p>
           </div>
           {isConnected && (
             <div className="flex gap-2">
@@ -136,19 +159,18 @@ export default function DashboardPage() {
 
         {/* Protocol Stats */}
         <section className="mb-8">
-          <h2 className="text-xs uppercase tracking-widest text-[#D9A650]/80 mb-3">Protocol Overview</h2>
+          <h2 className="text-xs uppercase tracking-widest text-white font-bold mb-3">Protocol Overview</h2>
           {loadingAnalytics ? (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-              {[...Array(6)].map((_, i) => (
+              {[...Array(5)].map((_, i) => (
                 <div key={i} className="bg-black border border-[#D9A650]/50 rounded-xl p-5 animate-pulse h-20" />
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
               <StatCard label="Total Markets" value={String(analytics?.totalMarkets ?? 0)} sub="On-chain conditions" />
               <StatCard label="Total Volume" value={`$${Number(analytics?.totalVolume ?? 0).toLocaleString()}`} sub="mUSDC split" />
               <StatCard label="Total Splits" value={String(analytics?.totalSplits ?? 0)} sub="Position splits" />
-              <StatCard label="Redemptions" value={String(analytics?.totalRedemptions ?? 0)} sub="Payouts claimed" />
               <StatCard label="Active Users" value={String(analytics?.totalUniqueWallets ?? 0)} sub="Unique wallets" />
               <StatCard label="Transactions" value={String(analytics?.totalTransactions ?? 0)} sub="All-time total" />
             </div>
@@ -159,7 +181,7 @@ export default function DashboardPage() {
         {isConnected && address && (
           <section className="mb-8">
             <h2 className="text-xs uppercase tracking-widest text-[#D9A650]/80 mb-3">Your Wallet</h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               <StatCard
                 label="mUSDC Balance"
                 value={`$${Number(usdcBalance).toLocaleString(undefined, { maximumFractionDigits: 2 })}`}
@@ -169,11 +191,6 @@ export default function DashboardPage() {
                 label="Your Volume"
                 value={`$${Number(wallet?.splitVolume ?? 0).toLocaleString()}`}
                 sub="mUSDC wagered"
-              />
-              <StatCard
-                label="Redeemed"
-                value={`$${Number(wallet?.redemptionVolume ?? 0).toLocaleString()}`}
-                sub="Claimed payouts"
               />
               <StatCard
                 label="Address"
@@ -187,7 +204,7 @@ export default function DashboardPage() {
 
         {/* Tabs */}
         <div className="flex gap-1 mb-6 bg-black border border-[#D9A650]/50 rounded-xl p-1 w-fit">
-          {(["overview", "markets", "activity"] as const).map((t) => (
+          {(["history", "markets", "activity"] as const).map((t) => (
             <button
               key={t}
               onClick={() => setTab(t)}
@@ -202,36 +219,92 @@ export default function DashboardPage() {
           ))}
         </div>
 
-        {/* Tab: Overview */}
-        {tab === "overview" && (
-          <div className="bg-black border border-[#D9A650]/50 rounded-xl p-6 space-y-4">
-            <h3 className="font-semibold text-[#f7f7fa]">Contract Addresses</h3>
-            <div className="space-y-3 text-sm">
-              {[
-                { label: "ConditionalTokens", addr: CONTRACT_ADDRESSES.CONDITIONAL_TOKEN },
-                { label: "mUSDC (Collateral)", addr: CONTRACT_ADDRESSES.USDC },
-                { label: "CTF Exchange", addr: CONTRACT_ADDRESSES.CTF_EXCHANGE },
-                { label: "SimpleResolver", addr: CONTRACT_ADDRESSES.SIMPLE_RESOLVER },
-              ].map(({ label, addr }) => (
-                <div key={label} className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3">
-                  <span className="text-[#D9A650]/80 w-44 shrink-0">{label}</span>
-                  <a
-                    href={`https://sepolia.basescan.org/address/${addr}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="font-mono text-xs text-[#F3B21A] hover:underline break-all"
-                  >
-                    {addr}
-                  </a>
+        {/* Tab: History */}
+        {tab === "history" && (
+          <div className="bg-black border border-[#D9A650]/50 rounded-xl overflow-hidden">
+            <div className="p-4 border-b border-[#D9A650]/50 flex items-center justify-between">
+              <div>
+                <h3 className="font-semibold text-[#f7f7fa]">Platform Transaction History</h3>
+                <p className="text-xs text-[#D9A650]/60 mt-0.5">{historyTotal.toLocaleString()} total transactions across all wallets</p>
+              </div>
+              <button onClick={() => fetchHistory(historyPage)} className="text-xs text-[#F3B21A] hover:underline">
+                Refresh
+              </button>
+            </div>
+            {loadingHistory ? (
+              <div className="divide-y divide-[#D9A650]/30">
+                {[...Array(8)].map((_, i) => (
+                  <div key={i} className="px-4 py-3 animate-pulse flex gap-3 items-center">
+                    <div className="h-5 w-12 bg-[#D9A650]/20 rounded-full" />
+                    <div className="h-4 flex-1 bg-[#D9A650]/10 rounded" />
+                    <div className="h-4 w-20 bg-[#D9A650]/10 rounded" />
+                  </div>
+                ))}
+              </div>
+            ) : historyTxs.length === 0 ? (
+              <div className="p-8 text-center text-[#D9A650]/80 text-sm">No transactions recorded yet.</div>
+            ) : (
+              <>
+                <div className="divide-y divide-[#D9A650]/30">
+                  {historyTxs.map((tx, i) => (
+                    <div key={i} className="px-4 py-3 flex items-center gap-3 hover:bg-[#D9A650]/5 transition-colors">
+                      <span className={`text-xs px-2 py-0.5 rounded-full capitalize shrink-0 ${
+                        ACTIVITY_BADGE[tx.type] ?? "bg-[#D9A650]/20 text-[#D9A650] border border-[#D9A650]/30"
+                      }`}>
+                        {tx.type}
+                      </span>
+                      <span className="font-mono text-xs text-[#D9A650]/60 shrink-0 hidden sm:block">
+                        {tx.wallet ? `${tx.wallet.slice(0, 10)}…${tx.wallet.slice(-6)}` : "—"}
+                      </span>
+                      <span className="font-mono text-xs text-[#D9A650]/40 flex-1 truncate">
+                        {tx.conditionId ?? "—"}
+                      </span>
+                      <span className="text-xs font-semibold text-white shrink-0">
+                        ${Number(tx.amount).toFixed(2)}
+                      </span>
+                      <span className="text-xs text-[#D9A650]/50 shrink-0 hidden md:block">
+                        #{tx.blockNumber?.toLocaleString()}
+                      </span>
+                      <span className="text-xs text-[#D9A650]/40 shrink-0 hidden lg:block">
+                        {tx.timestamp ? new Date(tx.timestamp).toLocaleDateString() : ""}
+                      </span>
+                      {tx.txHash && !tx.txHash.startsWith("fake") && (
+                        <a
+                          href={`https://sepolia.basescan.org/tx/${tx.txHash}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs text-[#F3B21A] hover:underline shrink-0"
+                        >
+                          ↗
+                        </a>
+                      )}
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-            <div className="pt-2 border-t border-[#D9A650]/50 text-xs text-[#D9A650]/80">
-              Chain: Base Sepolia (84532) · Block explorer:{" "}
-              <a href="https://sepolia.basescan.org" target="_blank" rel="noopener noreferrer" className="text-[#F3B21A] hover:underline">
-                sepolia.basescan.org
-              </a>
-            </div>
+                {/* Pagination */}
+                {historyTotal > 20 && (
+                  <div className="p-4 border-t border-[#D9A650]/30 flex items-center justify-between">
+                    <button
+                      disabled={historyPage <= 1}
+                      onClick={() => fetchHistory(historyPage - 1)}
+                      className="text-xs px-3 py-1.5 rounded border border-[#D9A650]/40 text-[#D9A650] disabled:opacity-30 hover:border-[#F3B21A] hover:text-[#F3B21A] transition"
+                    >
+                      ← Prev
+                    </button>
+                    <span className="text-xs text-[#D9A650]/60">
+                      Page {historyPage} of {Math.ceil(historyTotal / 20)}
+                    </span>
+                    <button
+                      disabled={historyPage >= Math.ceil(historyTotal / 20)}
+                      onClick={() => fetchHistory(historyPage + 1)}
+                      className="text-xs px-3 py-1.5 rounded border border-[#D9A650]/40 text-[#D9A650] disabled:opacity-30 hover:border-[#F3B21A] hover:text-[#F3B21A] transition"
+                    >
+                      Next →
+                    </button>
+                  </div>
+                )}
+              </>
+            )}
           </div>
         )}
 
