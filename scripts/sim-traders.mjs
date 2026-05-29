@@ -261,6 +261,7 @@ async function runBatch({
             questionId:  market.questionId ?? null,
             amount:      tradeAmount,
             amountRaw:   amountParsed.toString(),
+            outcomeIndex,
             blockNumber: Number(splitReceipt.blockNumber),
             timestamp:   new Date(),
           }).catch(() => {});

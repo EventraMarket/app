@@ -48,6 +48,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       questionId,
       amount,
       amountRaw,
+      outcomeIndex,
       blockNumber,
       timestamp,
     } = req.body;
@@ -75,6 +76,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       questionId: questionId ?? null,
       amount: amount ?? "0",
       amountRaw: amountRaw ?? "0",
+      outcomeIndex: outcomeIndex ?? null,
       blockNumber,
       timestamp: timestamp ? new Date(timestamp) : new Date(),
     });

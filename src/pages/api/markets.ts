@@ -11,15 +11,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   // ── GET ────────────────────────────────────────────────────────────────────
   if (req.method === "GET") {
-    const { category, resolved, page = "1", limit = "20" } = req.query;
+    const { category, resolved, conditionId, page = "1", limit = "20" } = req.query;
 
     const filter: Record<string, unknown> = {};
     if (category && category !== "all") filter.category = category;
     if (resolved === "true") filter.resolved = true;
     if (resolved === "false") filter.resolved = false;
+    if (conditionId) filter.conditionId = conditionId;
 
     const pageNum = Math.max(1, parseInt(page as string, 10));
-    const limitNum = Math.min(100, parseInt(limit as string, 10));
+    const limitNum = conditionId ? 1 : Math.min(100, parseInt(limit as string, 10));
 
     const [markets, total] = await Promise.all([
       Market.find(filter)

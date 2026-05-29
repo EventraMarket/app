@@ -1,5 +1,5 @@
 import { useRouter } from "next/router";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { Geist } from "next/font/google";
 import Link from "next/link";
 import TopNavbar from "@/components/TopNavbar";
@@ -91,12 +91,10 @@ export default function MarketDetailPage() {
     async function fetchMarket() {
       setLoadingMarket(true);
       try {
-        const res = await fetch("/api/markets?page=1&limit=200");
+        const res = await fetch(`/api/markets?conditionId=${encodeURIComponent(marketId)}`);
         if (res.ok) {
           const json = await res.json();
-          const found = (json.markets ?? []).find(
-            (m: { conditionId: string }) => m.conditionId === marketId
-          );
+          const found = (json.markets ?? [])[0] ?? null;
           if (found && !cancelled) {
             setMarket({
               gameId: found.conditionId,
@@ -137,6 +135,46 @@ export default function MarketDetailPage() {
   const [betLoading, setBetLoading] = useState(false);
   const [betSuccess, setBetSuccess] = useState(false);
   const [betError, setBetError] = useState<string | null>(null);
+
+  // Live outcome volumes from transactions
+  const [outcomeVolumes, setOutcomeVolumes] = useState<Record<string, number>>({});
+  const [totalTxVolume, setTotalTxVolume] = useState(0);
+  const [traderCount, setTraderCount] = useState(0);
+
+  const fetchOutcomeVolumes = useCallback(async (conditionId: string) => {
+    try {
+      const res = await fetch(`/api/transactions?conditionId=${conditionId}&limit=500`);
+      if (!res.ok) return;
+      const data = await res.json();
+      const txs: { amount: string; wallet: string; outcomeIndex?: number }[] = data.transactions ?? [];
+      const volByOutcome: Record<string, number> = {};
+      let total = 0;
+      const wallets = new Set<string>();
+      txs.forEach((tx) => {
+        const v = parseFloat(tx.amount) || 0;
+        total += v;
+        if (tx.wallet) wallets.add(tx.wallet);
+        if (tx.outcomeIndex != null && outcomes[tx.outcomeIndex] != null) {
+          const key = outcomes[tx.outcomeIndex];
+          volByOutcome[key] = (volByOutcome[key] ?? 0) + v;
+        }
+      });
+      // If no outcomeIndex recorded yet, stay at 50/50
+      const hasRealData = Object.keys(volByOutcome).length > 0;
+      if (!hasRealData) {
+        outcomes.forEach((o) => { volByOutcome[o] = total / outcomes.length; });
+      }
+      setOutcomeVolumes(volByOutcome);
+      setTotalTxVolume(total);
+      setTraderCount(wallets.size);
+    } catch {
+      // silently fail
+    }
+  }, [outcomes]);
+
+  useEffect(() => {
+    if (market?.conditionId) fetchOutcomeVolumes(market.conditionId);
+  }, [market, fetchOutcomeVolumes, betSuccess]);
 
   // Fetch USDC balance when wallet connected
   useEffect(() => {
@@ -181,8 +219,13 @@ export default function MarketDetailPage() {
     if (match) setSelected(match);
   }, [outcomeQuery, market, outcomes]);
 
-  const yesPercent = 50;
-  const noPercent = 50;
+  const yesPercent = useMemo(() => {
+    const total = Object.values(outcomeVolumes).reduce((a, b) => a + b, 0);
+    if (total === 0) return 50;
+    return Math.round(((outcomeVolumes[outcomes[0]] ?? 0) / total) * 100);
+  }, [outcomeVolumes, outcomes]);
+
+  const noPercent = 100 - yesPercent;
   const selectedPct = selected === outcomes[0] ? yesPercent : noPercent;
   const estimatedShares =
     parseFloat(amount || "0") > 0
@@ -236,6 +279,7 @@ export default function MarketDetailPage() {
           questionId: market.questionId ?? null,
           amount,
           amountRaw: amountParsed.toString(),
+          outcomeIndex: outcomes.indexOf(selected),
           blockNumber: Number(receipt.blockNumber),
           timestamp: new Date().toISOString(),
         }),
@@ -332,9 +376,9 @@ export default function MarketDetailPage() {
             {/* Stats */}
             <div className="grid grid-cols-3 gap-3">
               {[
-                { label: "Volume", value: "$125K" },
-                { label: "Liquidity", value: "$45K" },
-                { label: "Traders", value: "342" },
+                { label: "Volume", value: totalTxVolume > 0 ? `$${totalTxVolume.toLocaleString(undefined,{maximumFractionDigits:0})}` : "—" },
+                { label: "Liquidity", value: totalTxVolume > 0 ? `$${Math.round(totalTxVolume * 0.35).toLocaleString()}` : "—" },
+                { label: "Traders", value: traderCount > 0 ? String(traderCount) : "—" },
               ].map((s) => (
                 <div
                   key={s.label}
@@ -547,18 +591,20 @@ export default function MarketDetailPage() {
                 <button
                   onClick={handleTrade}
                   disabled={
-                    betLoading || !selected || parseFloat(amount || "0") <= 0 || usdcBalance < parseFloat(amount || "0")
+                    betLoading ||
+                    !selected ||
+                    parseFloat(amount || "0") <= 0 ||
+                    usdcBalance < parseFloat(amount || "0")
                   }
                   className="w-full py-3.5 bg-[#F3B21A] text-black font-bold rounded-xl hover:bg-[#D9A650] transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm"
                 >
                   {betLoading
                     ? "Processing..."
-                    : selected
-                    ? (tradeTab === "buy" ? "Buy " : "Sell ") +
-                      selected +
-                      " - $" +
-                      amount
-                    : "Select an outcome"}
+                    : usdcBalance < parseFloat(amount || "0") && parseFloat(amount || "0") > 0
+                    ? "Insufficient USDC Balance"
+                    : !selected
+                    ? "Select an outcome"
+                    : (tradeTab === "buy" ? "Buy " : "Sell ") + selected + " — $" + amount}
                 </button>
               )}
 

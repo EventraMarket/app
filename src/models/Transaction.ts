@@ -10,6 +10,7 @@ export interface ITransaction extends Document {
   questionId: string | null;
   amount: string;           // formatted mUSDC (or "0" for resolve/approve)
   amountRaw: string;        // bigint as string
+  outcomeIndex: number | null; // which outcome the user chose (0=Yes, 1=No, etc.)
   blockNumber: number;
   timestamp: Date;
   network: string;
@@ -25,6 +26,7 @@ const TransactionSchema = new Schema<ITransaction>(
     questionId:   { type: String, default: null },
     amount:       { type: String, default: "0" },
     amountRaw:    { type: String, default: "0" },
+    outcomeIndex: { type: Number, default: null },
     blockNumber:  { type: Number, required: true },
     timestamp:    { type: Date, required: true },
     network:      { type: String, default: "base-sepolia" },
