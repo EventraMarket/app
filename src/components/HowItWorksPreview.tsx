@@ -3,7 +3,7 @@ import Link from "next/link";
 const steps = [
   {
     number: "01",
-    title: "Connect Wallet",
+    title: "sigin",
     description: "Link your MetaMask or any EVM-compatible wallet to get started on Polygon Amoy testnet.",
     icon: (
       <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">

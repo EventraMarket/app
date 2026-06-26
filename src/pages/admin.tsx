@@ -1,11 +1,12 @@
+
 import { useState, useEffect, useCallback } from "react";
 import { Geist } from "next/font/google";
 import Link from "next/link";
 import TopNavbar from "@/components/TopNavbar";
 import { useWallet } from "@/context/WalletContext";
-import { useWalletClient, usePublicClient } from "wagmi";
+import { useWalletClient, usePublicClient, useAccount } from "wagmi";
 import { parseUnits, keccak256, encodePacked } from "viem";
-import { CONTRACT_ADDRESSES, SIMPLE_RESOLVER_ABI, CONDITIONAL_TOKEN_ABI } from "@/lib/contracts";
+import { getContracts, SIMPLE_RESOLVER_ABI, CONDITIONAL_TOKEN_ABI, FPMM_FACTORY_ABI, USDC_ABI, FPMM_ABI } from "@/lib/contracts";
 
 const CATEGORIES = ["Politics", "Sports", "Crypto", "Finance", "Culture", "Esports", "Economy", "Other"];
 
@@ -23,6 +24,8 @@ interface Market {
   winner: string | null;
   winnerIndex: number | null;
   blockNumber: number;
+  chainId: number;
+  fpmmAddress?: string;
   createdAt: string;
   resolvedAt: string | null;
   resolvedBy: string | null;
@@ -55,6 +58,8 @@ export default function AdminPage() {
   const { address, isConnected, connecting, connect } = useWallet();
   const { data: walletClient } = useWalletClient();
   const publicClient = usePublicClient();
+  const { chainId } = useAccount();
+  const contracts = getContracts(chainId);
 
   const [isAdmin, setIsAdmin] = useState(false);
   const [checkingAdmin, setCheckingAdmin] = useState(false);
@@ -67,6 +72,7 @@ export default function AdminPage() {
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
   const [createSuccess, setCreateSuccess] = useState<{ conditionId: string; questionId: string } | null>(null);
+  const [deployingFPMM, setDeployingFPMM] = useState(false);
 
   const [markets, setMarkets] = useState<Market[]>([]);
   const [loadingMarkets, setLoadingMarkets] = useState(false);
@@ -86,7 +92,6 @@ export default function AdminPage() {
   const [addingAdmin, setAddingAdmin] = useState(false);
   const [addAdminMsg, setAddAdminMsg] = useState<string | null>(null);
 
-  // Check admin status whenever wallet connects
   const checkAdmin = useCallback(async () => {
     if (!address) return;
     setCheckingAdmin(true);
@@ -134,8 +139,16 @@ export default function AdminPage() {
     }
   }, [address, isAdmin]);
 
-  useEffect(() => { if (isConnected) checkAdmin(); }, [isConnected, checkAdmin]);
-  useEffect(() => { if (isAdmin) { fetchMarkets(); fetchAdmins(); } }, [isAdmin, fetchMarkets, fetchAdmins]);
+  useEffect(() => {
+    if (isConnected) checkAdmin();
+  }, [isConnected, checkAdmin]);
+
+  useEffect(() => {
+    if (isAdmin) {
+      fetchMarkets();
+      fetchAdmins();
+    }
+  }, [isAdmin, fetchMarkets, fetchAdmins]);
 
   // ── Create Market ───────────────────────────────────────────────────────────
   function deriveQuestionId(t: string): `0x${string}` {
@@ -144,31 +157,47 @@ export default function AdminPage() {
 
   async function handleCreateMarket() {
     if (!walletClient || !publicClient || !address) return;
-    if (!createTitle.trim()) { setCreateError("Title is required."); return; }
-    if (createOutcomes.some((o) => !o.trim())) { setCreateError("All outcome labels must be filled."); return; }
+    if (!createTitle.trim()) {
+      setCreateError("Title is required.");
+      return;
+    }
+    if (createOutcomes.some((o) => !o.trim())) {
+      setCreateError("All outcome labels must be filled.");
+      return;
+    }
+
     setCreating(true);
     setCreateError(null);
     setCreateSuccess(null);
+
     try {
       const questionId = deriveQuestionId(createTitle.trim());
+
+       
+
+      // 1. Prepare condition on-chain
       const hash = await walletClient.writeContract({
-        address: CONTRACT_ADDRESSES.CONDITIONAL_TOKEN as `0x${string}`,
+        address: contracts.CONDITIONAL_TOKEN as `0x${string}`,
         abi: CONDITIONAL_TOKEN_ABI,
         functionName: "prepareCondition",
         args: [
-          CONTRACT_ADDRESSES.SIMPLE_RESOLVER as `0x${string}`,
+          contracts.SIMPLE_RESOLVER as `0x${string}`,
           questionId,
           BigInt(createOutcomes.length),
         ],
       });
+
       const receipt = await publicClient.waitForTransactionReceipt({ hash });
+
       const conditionId = keccak256(
         encodePacked(
           ["address", "bytes32", "uint256"],
-          [CONTRACT_ADDRESSES.SIMPLE_RESOLVER as `0x${string}`, questionId, BigInt(createOutcomes.length)]
+          [contracts.SIMPLE_RESOLVER as `0x${string}`, questionId, BigInt(createOutcomes.length)]
         )
       );
-      await fetch("/api/markets", {
+
+      // 2. Save market to DB
+      const saveRes = await fetch("/api/markets", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -179,40 +208,129 @@ export default function AdminPage() {
           outcomes: createOutcomes,
           outcomeSlotCount: createOutcomes.length,
           creator: address,
-          resolver: CONTRACT_ADDRESSES.SIMPLE_RESOLVER,
+          resolver: contracts.SIMPLE_RESOLVER,
           txHash: hash,
           blockNumber: Number(receipt.blockNumber),
+          chainId: Number(chainId),
         }),
       });
-      setCreateSuccess({ conditionId, questionId });
-      fetchMarkets();
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Transaction failed";
-      setCreateError(msg.length > 150 ? msg.slice(0, 150) + "..." : msg);
-    } finally {
-      setCreating(false);
-    }
+
+      if (!saveRes.ok) {
+        throw new Error("Failed to save market to database");
+      }
+
+      // 3. Deploy FPMM for this market
+      setDeployingFPMM(true);
+      // try {
+        // const fpmmRes = await fetch("/api/fpmm", {
+        //   method: "POST",
+        //   headers: { "Content-Type": "application/json" },
+        //   body: JSON.stringify({
+        //     conditionId,
+        //     collateralToken: contracts.USDC,
+        //     conditionalTokens: contracts.CONDITIONAL_TOKEN,
+        //     fee: "10000000000000000", // 1%
+        //   }),
+        // });
+
+        // if (!fpmmRes.ok) {
+        //   const errorData = await fpmmRes.json();
+        //   console.warn("FPMM deployment failed:", errorData);
+        //   setCreateError(
+        //     `Market created but FPMM deployment failed: ${errorData.error || "Unknown error"}`
+        //   );
+        const { result: fpmmAddress } = await publicClient.simulateContract({
+        address: contracts.FPMMFACTORY as `0x${string}`,
+        abi: FPMM_FACTORY_ABI,
+        functionName: "createFixedProductMarketMaker",
+        args: [
+          contracts.CONDITIONAL_TOKEN as `0x${string}`,
+          contracts.USDC as `0x${string}`,
+          [conditionId as `0x${string}`],
+          BigInt(10000000000000000), // 1% fee
+        ],
+        account: address, // the connected admin wallet
+      });
+      console.log("✅ FPMM will be deployed at:", fpmmAddress);
+          const fpmmTxHash = await walletClient.writeContract({
+               address: contracts.FPMMFACTORY as `0x${string}`,
+               abi: FPMM_FACTORY_ABI,
+               functionName: "createFixedProductMarketMaker",
+               args: [
+                 contracts.CONDITIONAL_TOKEN as `0x${string}`,
+                 contracts.USDC as `0x${string}`,
+                 [conditionId as `0x${string}`],
+                 BigInt(10000000000000000), // 1% fee
+               ],
+             });
+         
+               const fpmmReceipt = await publicClient.waitForTransactionReceipt({ hash: fpmmTxHash });
+               console.log("✅ FPMM deployed, transaction receipt:", fpmmReceipt);
+          setCreateSuccess({ conditionId, questionId });
+        //   return;
+        // }
+
+        // const { fpmmAddress } = await fpmmRes.json();
+        // console.log("✅ FPMM deployed at:", fpmmAddress);
+      await fetch("/api/markets", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ conditionId, fpmmAddress }),
+    });
+
+       const seedAmount = parseUnits("1", 6); // 100 USDC
+        // Approve FPMM to spend USDC
+        await walletClient.writeContract({
+          address: contracts.USDC as `0x${string}`,
+          abi: USDC_ABI,
+          functionName: "approve",
+          args: [fpmmAddress as `0x${string}`, seedAmount],
+        });
+        // Add funding
+        await walletClient.writeContract({
+          address: fpmmAddress as `0x${string}`,
+          abi: FPMM_ABI,
+          functionName: "addFunding",
+          args: [seedAmount, []],
+        });
+        // Refresh markets to show the new FPMM address
+        fetchMarkets();
+
+        setCreateSuccess({ conditionId, questionId });
+      } catch (fpmmErr) {
+        console.error("FPMM deployment error:", fpmmErr);
+        setCreateError("Market created but FPMM deployment failed. Please retry.");
+        // setCreateSuccess({ conditionId, questionId });
+      } finally {
+        setDeployingFPMM(false);
+      }
+    // } catch (err: unknown) {
+    //   const msg = err instanceof Error ? err.message : "Transaction failed";
+    //   setCreateError(msg.length > 150 ? msg.slice(0, 150) + "..." : msg);
+    // } finally {
+    //   setCreating(false);
+    // }
   }
 
   // ── Resolve Market ──────────────────────────────────────────────────────────
   async function handleResolve() {
     if (!resolveTarget || !walletClient || !publicClient || !address) return;
+
     setResolving(true);
     setResolveError(null);
     setResolveSuccess(null);
 
     try {
-      const outcomeCount = resolveTarget.outcomes.length;
-      // payouts: winning index gets 1e18, all others get 0
+      // Use simple [0,1] payouts (1 = winning outcome)
       const payouts: bigint[] = resolveTarget.outcomes.map((_, i) =>
-        i === resolveWinnerIdx ? parseUnits("1", 18) : 0n
+        i === resolveWinnerIdx ? 1n : 0n
       );
 
       const hash = await walletClient.writeContract({
-        address: CONTRACT_ADDRESSES.SIMPLE_RESOLVER as `0x${string}`,
+        address: contracts.SIMPLE_RESOLVER as `0x${string}`,
         abi: SIMPLE_RESOLVER_ABI,
         functionName: "resolve",
-        args: [resolveTarget.conditionId as `0x${string}`, payouts],
+        args: [resolveTarget.questionId as `0x${string}`, payouts],
       });
 
       const receipt = await publicClient.waitForTransactionReceipt({ hash });
@@ -289,18 +407,16 @@ export default function AdminPage() {
       <TopNavbar />
 
       <main className="pt-20 md:pt-24 pb-16 px-4 max-w-6xl mx-auto">
-        {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold">Admin Panel</h1>
-            <p className="text-[#D9A650] text-sm mt-1">Resolve markets · Manage admins · Base Sepolia</p>
+            <p className="text-[#D9A650] text-sm mt-1">Resolve markets · Manage admins</p>
           </div>
           <Link href="/dashboard" className="text-sm text-[#F3B21A] hover:underline">
             ← Dashboard
           </Link>
         </div>
 
-        {/* Not connected */}
         {!isConnected && (
           <div className="bg-black border border-[#D9A650]/50 rounded-xl p-8 text-center">
             <p className="text-[#D9A650] mb-4">Connect your wallet to access the admin panel.</p>
@@ -314,12 +430,10 @@ export default function AdminPage() {
           </div>
         )}
 
-        {/* Checking admin status */}
         {isConnected && checkingAdmin && (
           <div className="text-[#D9A650] text-sm">Checking admin status...</div>
         )}
 
-        {/* Not admin */}
         {isConnected && !checkingAdmin && !isAdmin && (
           <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-8 text-center">
             <p className="text-red-400 font-semibold mb-2">Access Denied</p>
@@ -330,16 +444,13 @@ export default function AdminPage() {
           </div>
         )}
 
-        {/* Admin panel */}
         {isConnected && !checkingAdmin && isAdmin && (
           <>
-            {/* Admin badge */}
             <div className="flex items-center gap-3 mb-6 px-4 py-3 bg-green-500/10 border border-green-500/20 rounded-xl">
               <Badge color="green">Admin</Badge>
               <span className="font-mono text-sm text-[#DED5A8]">{address}</span>
             </div>
 
-            {/* Resolve success / error */}
             {resolveSuccess && (
               <div className="mb-4 bg-green-500/10 border border-green-500/30 rounded-xl p-4 text-sm text-green-400">
                 {resolveSuccess}
@@ -351,7 +462,6 @@ export default function AdminPage() {
               </div>
             )}
 
-            {/* Tabs */}
             <div className="flex gap-1 mb-6 bg-black border border-[#D9A650]/50 rounded-xl p-1 w-fit">
               {(["markets", "create", "admins"] as const).map((t) => (
                 <button
@@ -369,7 +479,6 @@ export default function AdminPage() {
             {/* ── TAB: MARKETS ─────────────────────────────────────────────── */}
             {tab === "markets" && (
               <div>
-                {/* Resolve modal */}
                 {resolveTarget && (
                   <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
                     <div className="bg-black border border-[#D9A650]/50 rounded-2xl p-6 w-full max-w-md mx-4">
@@ -399,7 +508,10 @@ export default function AdminPage() {
 
                       <div className="flex gap-3">
                         <button
-                          onClick={() => { setResolveTarget(null); setResolveError(null); }}
+                          onClick={() => {
+                            setResolveTarget(null);
+                            setResolveError(null);
+                          }}
                           className="flex-1 py-2.5 border border-[#D9A650]/50 text-[#D9A650] rounded-lg text-sm hover:text-white transition"
                         >
                           Cancel
@@ -429,7 +541,12 @@ export default function AdminPage() {
                   ) : markets.length === 0 ? (
                     <div className="p-8 text-center text-[#D9A650]/80 text-sm">
                       No markets in database yet.{" "}
-                      <Link href="/create" className="text-[#F3B21A] hover:underline">Create one →</Link>
+                      <button
+                        onClick={() => setTab("create")}
+                        className="text-[#F3B21A] hover:underline"
+                      >
+                        Create one →
+                      </button>
                     </div>
                   ) : (
                     <div className="divide-y divide-[#D9A650]/30">
@@ -442,6 +559,11 @@ export default function AdminPage() {
                                   {m.resolved ? "Resolved" : "Active"}
                                 </Badge>
                                 <Badge color="blue">{m.category}</Badge>
+                                {m.fpmmAddress ? (
+                                  <Badge color="green">FPMM ✓</Badge>
+                                ) : (
+                                  <Badge color="yellow">No FPMM</Badge>
+                                )}
                                 <span className="text-xs text-[#D9A650]/60">Block #{m.blockNumber}</span>
                               </div>
                               <p className="font-semibold text-sm text-white mb-1 truncate">{m.title}</p>
@@ -467,6 +589,11 @@ export default function AdminPage() {
                                 <p className="text-xs text-[#D9A650]/60 mt-1">
                                   Resolved {new Date(m.resolvedAt).toLocaleDateString()} by{" "}
                                   <span className="font-mono">{m.resolvedBy?.slice(0, 8)}...</span>
+                                </p>
+                              )}
+                              {m.fpmmAddress && (
+                                <p className="text-xs text-[#D9A650]/60 mt-1 font-mono truncate">
+                                  FPMM: {m.fpmmAddress}
                                 </p>
                               )}
                             </div>
@@ -496,12 +623,20 @@ export default function AdminPage() {
               <div className="space-y-5 max-w-2xl">
                 {createSuccess ? (
                   <div className="bg-green-500/10 border border-green-500/30 rounded-xl p-6 space-y-3">
-                    <p className="text-green-400 font-semibold">Market created on-chain!</p>
+                    <p className="text-green-400 font-semibold">
+                      Market created on-chain!
+                      {deployingFPMM && " Deploying FPMM..."}
+                    </p>
                     <p className="text-xs text-[#D9A650] font-mono break-all">conditionId: {createSuccess.conditionId}</p>
                     <p className="text-xs text-[#D9A650] font-mono break-all">questionId: {createSuccess.questionId}</p>
                     <div className="flex gap-4 pt-1">
                       <button
-                        onClick={() => { setCreateSuccess(null); setCreateTitle(""); setCreateOutcomes(["Yes", "No"]); setCreateCategory("Politics"); }}
+                        onClick={() => {
+                          setCreateSuccess(null);
+                          setCreateTitle("");
+                          setCreateOutcomes(["Yes", "No"]);
+                          setCreateCategory("Politics");
+                        }}
                         className="text-sm text-[#F3B21A] hover:underline"
                       >
                         Create another
@@ -599,8 +734,15 @@ export default function AdminPage() {
 
                     {/* Info */}
                     <div className="bg-yellow-400/5 border border-yellow-400/20 rounded-xl p-4 text-xs text-yellow-300 space-y-1">
-                      <p><strong>Resolver:</strong> <span className="font-mono break-all">{CONTRACT_ADDRESSES.SIMPLE_RESOLVER}</span></p>
-                      <p><strong>ConditionalTokens:</strong> <span className="font-mono break-all">{CONTRACT_ADDRESSES.CONDITIONAL_TOKEN}</span></p>
+                      <p>
+                        <strong>Resolver:</strong>{" "}
+                        <span className="font-mono break-all">{contracts.SIMPLE_RESOLVER}</span>
+                      </p>
+                      <p>
+                        <strong>ConditionalTokens:</strong>{" "}
+                        <span className="font-mono break-all">{contracts.CONDITIONAL_TOKEN}</span>
+                      </p>
+                      <p className="text-yellow-400/60">An FPMM will be automatically deployed after market creation.</p>
                     </div>
 
                     {createError && (
@@ -624,7 +766,6 @@ export default function AdminPage() {
             {/* ── TAB: ADMINS ──────────────────────────────────────────────── */}
             {tab === "admins" && (
               <div className="space-y-6">
-                {/* Add Admin */}
                 <div className="bg-black border border-[#D9A650]/50 rounded-xl p-6">
                   <h3 className="font-semibold mb-4">Add Admin</h3>
                   <div className="flex gap-3">
@@ -648,7 +789,6 @@ export default function AdminPage() {
                   )}
                 </div>
 
-                {/* Admin List */}
                 <div className="bg-black border border-[#D9A650]/50 rounded-xl overflow-hidden">
                   <div className="p-4 border-b border-[#D9A650]/50 flex items-center justify-between">
                     <h3 className="font-semibold">Admins ({admins.length})</h3>

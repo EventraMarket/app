@@ -3,18 +3,18 @@ import { Geist } from "next/font/google";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import { useWallet } from "@/context/WalletContext";
-import { usePublicClient, useWalletClient } from "wagmi";
+import { useAccount, usePublicClient, useWalletClient } from "wagmi";
 import { parseUnits, formatUnits } from "viem";
-import { CONTRACT_ADDRESSES, USDC_ABI } from "@/lib/contracts";
+import { getContracts, CONTRACT_ADDRESSES, USDC_ABI } from "@/lib/contracts";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
 });
 
-const FAUCET_CONTRACT = CONTRACT_ADDRESSES.USDC;
-const TOKEN_CONTRACT = CONTRACT_ADDRESSES.USDC;
-const FAUCET_AMOUNT = parseUnits("100", 6); // 1,000 mUSDC per claim
+// const FAUCET_CONTRACT = CONTRACT_ADDRESSES.USDC;
+// const TOKEN_CONTRACT = CONTRACT_ADDRESSES.USDC;
+// const FAUCET_AMOUNT = parseUnits("100", 6); // 1,000 mUSDC per claim
 
 // const FAUCET_ABI = [
 //   {
@@ -41,7 +41,11 @@ export default function FaucetPage() {
   const [mintSuccess, setMintSuccess] = useState(false);
   const [mintError, setMintError] = useState<string | null>(null);
   const [txHash, setTxHash] = useState<string | null>(null);
-
+    const { chainId } = useAccount();
+   const contracts = getContracts(chainId);
+  const FAUCET_CONTRACT = contracts.USDC;
+const TOKEN_CONTRACT = contracts.USDC;
+const FAUCET_AMOUNT = parseUnits("100", 6); // 1
   // Fetch token info and balance
   useEffect(() => {
     if (!publicClient || !address) return;
@@ -87,7 +91,7 @@ export default function FaucetPage() {
 
     try {
       const hash = await walletClient.writeContract({
-        address: FAUCET_CONTRACT,
+        address: TOKEN_CONTRACT as `0x${string}`,
         abi: USDC_ABI,
         functionName: "faucet",
         args: [address as `0x${string}`, FAUCET_AMOUNT],
@@ -137,7 +141,7 @@ export default function FaucetPage() {
               </div>
               <div>
                 <h3 className="font-semibold text-white">{tokenSymbol}</h3>
-                <p className="text-xs text-gray-500">Polygon Amoy Testnet</p>
+                <p className="text-xs text-gray-500">Base Testnet</p>
               </div>
             </div>
             <div className="text-right">
@@ -175,7 +179,7 @@ export default function FaucetPage() {
                 disabled={connecting}
                 className="px-8 py-3 bg-gradient-to-r from-[var(--color-accent)] to-[var(--color-accent2)] text-black font-semibold rounded-lg hover:from-[var(--color-accent2)] hover:to-[var(--color-accent)] transition-all shadow-lg shadow-[var(--color-accent2)]/25 disabled:opacity-50"
               >
-                {connecting ? "Connecting..." : "Connect Wallet"}
+                {connecting ? "Connecting..." : "sigin"}
               </button>
             </div>
           ) : (
@@ -211,7 +215,7 @@ export default function FaucetPage() {
                       rel="noopener noreferrer"
                       className="text-xs text-green-400/70 hover:text-green-400 underline mt-1 inline-block"
                     >
-                      View transaction on PolygonScan &rarr;
+                      View transaction on BaseScan or Celoscan &rarr;
                     </a>
                   )}
                 </div>
@@ -252,7 +256,7 @@ export default function FaucetPage() {
                 rel="noopener noreferrer"
                 className="text-[var(--color-accent2)] hover:text-[var(--color-accent)] underline"
               >
-                Polygon Faucet
+               Base and Celo Faucet
               </a>.
             </p>
           </div>

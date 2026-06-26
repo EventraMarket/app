@@ -13,15 +13,16 @@
  * This route records the resolution in MongoDB and validates admin status.
  */
 import type { NextApiRequest, NextApiResponse } from "next";
-import { connectDB } from "@/lib/mongodb";
+import { connectToDatabase } from "@/lib/mongodb";
 import { Admin } from "@/models/Admin";
 import { Market } from "@/models/Market";
 import { Transaction } from "@/models/Transaction";
 
 // The deployer/owner wallet that was seeded as the first admin.
 // Set this to your deployer wallet in .env.local as ADMIN_SEED_WALLET.
-const SEED_ADMIN = (process.env.ADMIN_SEED_WALLET ?? "").toLowerCase();
-
+//const SEED_ADMIN = `process.env.ADMIN_SEED_WALLET`.toLowerCase();
+//const SEED_ADMIN ="0xb00d418b513a12984436eC4d8171594d4b1292d9".toLocaleLowerCase();
+const SEED_ADMIN = '0xd3C8c75D47BF2cbE9073Ab5bf66afAC41AaD4bf6'.toLowerCase()
 async function isAdmin(wallet: string): Promise<boolean> {
   if (!wallet) return false;
   const w = wallet.toLowerCase();
@@ -32,7 +33,7 @@ async function isAdmin(wallet: string): Promise<boolean> {
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
-    await connectDB();
+    await connectToDatabase();
   } catch (err) {
     console.error("[admin] DB connection failed:", err);
     return res.status(500).json({ error: "Database connection failed", detail: String(err) });

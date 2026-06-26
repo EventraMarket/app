@@ -7,7 +7,7 @@ export default function Navbar() {
   const navLinks = [
     { href: "/how-it-works", label: "How It Works" },
     { href: "/faq", label: "FAQ" },
-    { href: "/faucet", label: "Faucet" },
+    // { href: "/faucet", label: "Faucet" },
   ];
 
   return (

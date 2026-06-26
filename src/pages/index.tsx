@@ -56,7 +56,7 @@ export default function LandingPage() {
         <div className="hidden md:flex items-center gap-8 text-sm font-medium">
           <Link href="/markets" className="hover:opacity-70 transition-opacity">Markets</Link>
           <Link href="/how-it-works" className="hover:opacity-70 transition-opacity">How It Works</Link>
-          <Link href="/faucet" className="hover:opacity-70 transition-opacity">Faucet</Link>
+          {/* <Link href="/faucet" className="hover:opacity-70 transition-opacity">Faucet</Link> */}
           <Link href="/faq" className="hover:opacity-70 transition-opacity">FAQ</Link>
         </div>
         <div className="flex items-center gap-3">
@@ -68,7 +68,7 @@ export default function LandingPage() {
           ) : (
             <button onClick={connect} disabled={connecting}
               className="px-4 py-2 bg-black text-[#F3B21A] text-sm font-bold rounded-full hover:brightness-110 transition disabled:opacity-50">
-              {connecting ? "Connecting…" : "Connect Wallet"}
+              {connecting ? "Connecting…" : "Signin"}
             </button>
           )}
         </div>
@@ -81,7 +81,7 @@ export default function LandingPage() {
         <div className="absolute bottom-0 right-1/4 w-80 h-80 bg-black/5 rounded-full blur-3xl pointer-events-none" />
 
         <span className="inline-block mb-4 px-4 py-1.5 bg-black text-[#F3B21A] text-xs font-bold rounded-full uppercase tracking-widest shadow">
-          Built on Base Sepolia · Open Beta
+          Built on Celo Network
         </span>
 
         <h1 className="text-5xl sm:text-6xl md:text-7xl font-extrabold leading-tight max-w-4xl mb-6 text-black">
@@ -97,10 +97,27 @@ export default function LandingPage() {
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4 items-center justify-center">
-          <Link href="/markets"
+          {/* <Link href="/markets"
             className="px-8 py-4 bg-black text-[#F3B21A] text-base font-bold rounded-2xl shadow-xl hover:brightness-110 hover:scale-105 transition-all duration-200">
             Browse Markets →
-          </Link>
+          </Link> */}
+          {/* <div className="flex flex-col sm:flex-row gap-4 items-center justify-center"> */}
+      {isConnected ? (
+        <Link 
+          href="/markets"
+          className="px-8 py-4 bg-black text-[#F3B21A] text-base font-bold rounded-2xl shadow-xl hover:brightness-110 hover:scale-105 transition-all duration-200"
+        >
+          Browse Markets
+        </Link>
+      ) : (
+        <button 
+          onClick={connect}
+          disabled={connecting}
+          className="px-8 py-4 bg-black text-[#F3B21A] text-base font-bold rounded-2xl shadow-xl hover:brightness-110 hover:scale-105 transition-all duration-200"
+        >
+          {connecting ? "Signing..." : " Browse Markets"}
+        </button>
+      )}
           <Link href="/how-it-works"
             className="px-8 py-4 bg-black/10 text-black text-base font-semibold rounded-2xl border border-black/20 hover:bg-black/20 transition-all duration-200">
             How It Works

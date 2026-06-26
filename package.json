@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "seed": "node scripts/seed-markets.mjs",
+    "apptest": "node scripts/apptest.mjs",
     "seed:watch": "nodemon --watch scripts/seed-markets.mjs --exec \"node scripts/seed-markets.mjs --dry-run\"",
     "sim": "node scripts/sim-traders.mjs",
     "sim:dry": "node scripts/sim-traders.mjs --dry-run",

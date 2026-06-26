@@ -14,6 +14,8 @@ export interface IMarket extends Document {
   winnerIndex: number | null;
   txHash: string;
   blockNumber: number;
+  chainId: number;    
+  fpmmAddress?: string;       // blockchain ID (84532=Base Sepolia, 44787=Celo Sepolia)
   createdAt: Date;
   resolvedAt: Date | null;
   resolvedBy: string | null; // admin wallet
@@ -22,7 +24,7 @@ export interface IMarket extends Document {
 
 const MarketSchema = new Schema<IMarket>(
   {
-    conditionId:    { type: String, required: true, unique: true, index: true },
+    conditionId:    { type: String, required: true, index: true },
     questionId:     { type: String, required: true, index: true },
     title:          { type: String, required: true },
     category:       { type: String, default: "Other" },
@@ -35,11 +37,16 @@ const MarketSchema = new Schema<IMarket>(
     winnerIndex:    { type: Number, default: null },
     txHash:         { type: String, required: true },
     blockNumber:    { type: Number, required: true },
+    chainId:        { type: Number, required: true, index: true },
+    fpmmAddress:    { type: String, default: null },
     resolvedAt:     { type: Date, default: null },
     resolvedBy:     { type: String, default: null, lowercase: true },
     resolveTxHash:  { type: String, default: null },
   },
   { timestamps: true }
 );
+
+// Compound index for unique conditionId per chain
+MarketSchema.index({ conditionId: 1, chainId: 1 }, { unique: true });
 
 export const Market = models.Market ?? model<IMarket>("Market", MarketSchema);

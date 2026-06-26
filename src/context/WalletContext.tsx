@@ -1,6 +1,6 @@
-import { createContext, useContext, useCallback, ReactNode } from "react";
-import { useAccount, useConnect, useDisconnect } from "wagmi";
-import { injected } from "wagmi/connectors";
+import { createContext, useContext, useEffect, ReactNode } from "react";
+import { useAccount, useConnect, useDisconnect, injected } from "wagmi";
+import { useConnectModal } from "@rainbow-me/rainbowkit";
 import type { Address } from "viem";
 
 interface WalletContextValue {
@@ -9,6 +9,7 @@ interface WalletContextValue {
   connecting: boolean;
   connect: () => void;
   disconnect: () => void;
+  isMiniPay: boolean;
 }
 
 const WalletContext = createContext<WalletContextValue>({
@@ -17,6 +18,7 @@ const WalletContext = createContext<WalletContextValue>({
   connecting: false,
   connect: () => {},
   disconnect: () => {},
+  isMiniPay: false,
 });
 
 export function useWallet() {
@@ -25,12 +27,19 @@ export function useWallet() {
 
 export function WalletProvider({ children }: { children: ReactNode }) {
   const { address, isConnected, isConnecting, isReconnecting } = useAccount();
-  const { connect: wagmiConnect } = useConnect();
-  const { disconnect: wagmiDisconnect } = useDisconnect();
+  const { openConnectModal } = useConnectModal();
+  const { connect } = useConnect();
+  const { disconnect } = useDisconnect();
 
-  const connect = useCallback(() => {
-    wagmiConnect({ connector: injected() });
-  }, [wagmiConnect]);
+  // Safe checks for the injected window context provider flags
+  const isMiniPay = typeof window !== "undefined" && !!(window.ethereum as any)?.isMiniPay;
+
+  useEffect(() => {
+    // If running within MiniPay, bypass buttons and run immediate background auto-connection
+    if (isMiniPay && !isConnected) {
+      connect({ connector: injected() });
+    }
+  }, [isMiniPay, isConnected, connect]);
 
   return (
     <WalletContext.Provider
@@ -38,8 +47,9 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         address,
         isConnected,
         connecting: isConnecting || isReconnecting,
-        connect,
-        disconnect: wagmiDisconnect,
+        connect: isMiniPay ? () => {} : (openConnectModal || (() => {})),
+        disconnect,
+        isMiniPay,
       }}
     >
       {children}

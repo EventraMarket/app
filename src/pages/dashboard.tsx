@@ -1,12 +1,14 @@
+
+
 import { useState, useEffect, useCallback } from "react";
 import { Geist } from "next/font/google";
 import Link from "next/link";
 import TopNavbar from "@/components/TopNavbar";
 import { useWallet } from "@/context/WalletContext";
-import { usePublicClient } from "wagmi";
+import { useAccount, usePublicClient } from "wagmi";
 import { formatUnits } from "viem";
 import type { AnalyticsResponse } from "./api/analytics";
-import { CONTRACT_ADDRESSES, USDC_ABI } from "@/lib/contracts";
+import { getContracts, CONTRACT_ADDRESSES, USDC_ABI } from "@/lib/contracts";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 
@@ -29,7 +31,8 @@ const ACTIVITY_BADGE: Record<string, string> = {
 export default function DashboardPage() {
   const { address, isConnected, connecting, connect } = useWallet();
   const publicClient = usePublicClient();
-
+  const { chainId } = useAccount();
+  const contracts = getContracts(chainId);
   const [analytics, setAnalytics] = useState<AnalyticsResponse | null>(null);
   const [loadingAnalytics, setLoadingAnalytics] = useState(false);
   const [usdcBalance, setUsdcBalance] = useState<string>("0");
@@ -43,42 +46,52 @@ export default function DashboardPage() {
   const [historyPage, setHistoryPage] = useState(1);
   const [historyTotal, setHistoryTotal] = useState(0);
 
-  const fetchHistory = useCallback(async (page = 1) => {
-    setLoadingHistory(true);
-    try {
-      const res = await fetch(`/api/transactions?limit=20&page=${page}`);
-      const data = await res.json();
-      setHistoryTxs(data.transactions ?? []);
-      setHistoryTotal(data.total ?? 0);
-      setHistoryPage(page);
-    } catch {
-      // silently fail
-    } finally {
-      setLoadingHistory(false);
-    }
-  }, []);
+  // Forced strictly to Celo Mainnet settings for analytical layers
+  const CELO_MAINNET_ID = 42220;
+  const currentNetworkName = "Celo Mainnet";
+  const explorerBaseUrl = "https://celoscan.io";
 
-  const fetchAnalytics = useCallback(async () => {
-    setLoadingAnalytics(true);
-    try {
-      const url = address
-        ? `/api/analytics?address=${address}`
-        : "/api/analytics";
-      const res = await fetch(url);
-      const data: AnalyticsResponse = await res.json();
-      setAnalytics(data);
-    } catch {
-      // silently fail
-    } finally {
-      setLoadingAnalytics(false);
+
+const fetchHistory = useCallback(async (page = 1) => {
+  setLoadingHistory(true);
+  try {
+    const targetChain = chainId || 42220; // Default to Celo Mainnet
+    const res = await fetch(`/api/transactions?limit=20&page=${page}&chainId=${targetChain}`);
+    const data = await res.json();
+    setHistoryTxs(data.transactions ?? []);
+    setHistoryTotal(data.total ?? 0);
+    setHistoryPage(page);
+  } catch {
+    // silently fail
+  } finally {
+    setLoadingHistory(false);
+  }
+}, [chainId]); // Added chainId dependency parameter
+
+const fetchAnalytics = useCallback(async () => {
+  setLoadingAnalytics(true);
+  try {
+    const targetChain = chainId || 42220; // Default to Celo Mainnet
+    let url = `/api/analytics?chainId=${targetChain}`;
+    if (address) {
+      url += `&address=${address.toLowerCase()}`;
     }
-  }, [address]);
+    const res = await fetch(url);
+    const data: AnalyticsResponse = await res.json();
+    setAnalytics(data);
+  } catch (err) {
+    console.error("Failed to fetch analytics:", err);
+  } finally {
+    setLoadingAnalytics(false);
+  }
+}, [address, chainId]); // Added chainId dependency parameter
+
 
   const fetchUsdcBalance = useCallback(async () => {
-    if (!publicClient || !address) return;
+    if (!publicClient || !address || !contracts.USDC) return;
     try {
       const bal = await publicClient.readContract({
-        address: CONTRACT_ADDRESSES.USDC as `0x${string}`,
+        address: contracts.USDC as `0x${string}`,
         abi: USDC_ABI,
         functionName: "balanceOf",
         args: [address],
@@ -87,7 +100,7 @@ export default function DashboardPage() {
     } catch {
       setUsdcBalance("—");
     }
-  }, [publicClient, address]);
+  }, [publicClient, address, contracts.USDC]);
 
   const checkAdmin = useCallback(async () => {
     if (!address) return;
@@ -104,11 +117,24 @@ export default function DashboardPage() {
   useEffect(() => {
     fetchAnalytics();
     fetchHistory(1);
-  }, [fetchAnalytics, fetchHistory]);
+  }, [fetchAnalytics, fetchHistory, chainId]); 
+
+  // Trades happen on the market detail page, a separate route with no
+  // shared state — so the dashboard never hears about them. Refetch
+  // whenever this tab regains focus (e.g. coming back from a trade) so
+  // numbers don't look stale without requiring a hard refresh.
+  useEffect(() => {
+    function handleFocus() {
+      fetchAnalytics();
+      fetchHistory(historyPage);
+    }
+    window.addEventListener("focus", handleFocus);
+    return () => window.removeEventListener("focus", handleFocus);
+  }, [fetchAnalytics, fetchHistory, historyPage]);
 
   useEffect(() => {
     if (isConnected) { fetchUsdcBalance(); checkAdmin(); }
-  }, [isConnected, fetchUsdcBalance, checkAdmin]);
+  }, [isConnected, fetchUsdcBalance, checkAdmin, chainId]);
 
   const wallet = analytics?.wallet;
 
@@ -121,7 +147,7 @@ export default function DashboardPage() {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold">Dashboard</h1>
-            <p className="text-black/70 text-sm mt-1 font-medium">Protocol analytics &amp; wallet activity — Base Sepolia</p>
+            <p className="text-black/70 text-sm mt-1 font-medium">Protocol analytics &amp; wallet activity — {currentNetworkName}</p>
           </div>
           {isConnected && (
             <div className="flex gap-2">
@@ -169,7 +195,7 @@ export default function DashboardPage() {
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
               <StatCard label="Total Markets" value={String(analytics?.totalMarkets ?? 0)} sub="On-chain conditions" />
-              <StatCard label="Total Volume" value={`$${Number(analytics?.totalVolume ?? 0).toLocaleString()}`} sub="mUSDC split" />
+              <StatCard label="Total Volume" value={`$${Number(analytics?.totalVolume ?? 0).toLocaleString()}`} sub="USDT split" />
               <StatCard label="Total Splits" value={String(analytics?.totalSplits ?? 0)} sub="Position splits" />
               <StatCard label="Active Users" value={String(analytics?.totalUniqueWallets ?? 0)} sub="Unique wallets" />
               <StatCard label="Transactions" value={String(analytics?.totalTransactions ?? 0)} sub="All-time total" />
@@ -183,19 +209,19 @@ export default function DashboardPage() {
             <h2 className="text-xs uppercase tracking-widest text-[#D9A650]/80 mb-3">Your Wallet</h2>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               <StatCard
-                label="mUSDC Balance"
+                label="USDT Balance"
                 value={`$${Number(usdcBalance).toLocaleString(undefined, { maximumFractionDigits: 2 })}`}
-                sub="Mock USDC"
+                sub="USDT"
               />
               <StatCard
                 label="Your Volume"
                 value={`$${Number(wallet?.splitVolume ?? 0).toLocaleString()}`}
-                sub="mUSDC wagered"
+                sub="USDT wagered"
               />
               <StatCard
                 label="Address"
                 value={address}
-                sub="Base Sepolia"
+                sub={currentNetworkName}
                 mono
               />
             </div>
@@ -227,7 +253,10 @@ export default function DashboardPage() {
                 <h3 className="font-semibold text-[#f7f7fa]">Platform Transaction History</h3>
                 <p className="text-xs text-[#D9A650]/60 mt-0.5">{historyTotal.toLocaleString()} total transactions across all wallets</p>
               </div>
-              <button onClick={() => fetchHistory(historyPage)} className="text-xs text-[#F3B21A] hover:underline">
+              <button
+                onClick={() => { fetchHistory(historyPage); fetchAnalytics(); }}
+                className="text-xs text-[#F3B21A] hover:underline"
+              >
                 Refresh
               </button>
             </div>
@@ -270,7 +299,7 @@ export default function DashboardPage() {
                       </span>
                       {tx.txHash && !tx.txHash.startsWith("fake") && (
                         <a
-                          href={`https://sepolia.basescan.org/tx/${tx.txHash}`}
+                          href={`${explorerBaseUrl}/tx/${tx.txHash}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-xs text-[#F3B21A] hover:underline shrink-0"
@@ -350,7 +379,7 @@ export default function DashboardPage() {
                       <div className="flex items-center gap-2 shrink-0">
                         <span className="text-xs text-[#D9A650]/60">block #{m.blockNumber}</span>
                         <a
-                          href={`https://sepolia.basescan.org/address/${m.conditionId}`}
+                          href={`${explorerBaseUrl}/address/${m.conditionId}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-xs text-[#F3B21A] hover:underline"
@@ -382,12 +411,22 @@ export default function DashboardPage() {
               <div className="divide-y divide-[#D9A650]/30">
                 {wallet.recentActivity.map((a, i) => (
                   <div key={i} className="px-4 py-3 flex items-center gap-3">
-                    <span className={`text-xs px-2 py-0.5 rounded-full capitalize ${ACTIVITY_BADGE[a.type]}`}>
+                    <span className={`text-xs px-2 py-0.5 rounded-full capitalize ${ACTIVITY_BADGE[a.type] || "bg-zinc-800 text-zinc-400"}`}>
                       {a.type}
                     </span>
                     <span className="font-mono text-xs text-[#D9A650]/80 flex-1 truncate">{a.conditionId}</span>
-                    <span className="text-xs font-semibold text-white">${Number(a.amount).toFixed(2)} mUSDC</span>
+                    <span className="text-xs font-semibold text-white">${Number(a.amount).toFixed(2)} USDT</span>
                     <span className="text-xs text-[#D9A650]/60 shrink-0">#{a.blockNumber}</span>
+                    {a.txHash && (
+                      <a
+                        href={`${explorerBaseUrl}/tx/${a.txHash}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs text-[#F3B21A] hover:underline shrink-0"
+                      >
+                        ↗
+                      </a>
+                    )}
                   </div>
                 ))}
               </div>

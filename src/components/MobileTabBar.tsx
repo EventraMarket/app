@@ -24,7 +24,7 @@ const navItems = [
   { href: "/markets", label: "Markets", icon: icons.markets },
   { href: "/dashboard", label: "Dashboard", icon: icons.points },
   { href: "/create", label: "Create", icon: icons.search },
-  { href: "/faucet", label: "Faucet", icon: icons.user },
+  // { href: "/faucet", label: "Faucet", icon: icons.user },
 ];
 
 export default function MobileTabBar() {

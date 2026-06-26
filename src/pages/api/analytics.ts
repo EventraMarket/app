@@ -1,14 +1,6 @@
-/**
- * GET /api/analytics
- * Returns protocol-wide stats from MongoDB (populated by on-chain indexer).
- *
- * Optional query params:
- *   ?address=0x...  — also returns per-wallet stats for that address
- */
+
 import type { NextApiRequest, NextApiResponse } from "next";
-import { connectDB } from "@/lib/mongodb";
-import { Market } from "@/models/Market";
-import { Transaction } from "@/models/Transaction";
+import { connectToDatabase } from "@/lib/mongodb";
 
 export type AnalyticsResponse = {
   totalMarkets: number;
@@ -51,119 +43,7 @@ export default async function handler(
   res: NextApiResponse<AnalyticsResponse>
 ) {
   if (req.method !== "GET") {
-    res.setHeader("Allow", "GET");
-    res.status(405).end();
-    return;
-  }
-
-  const walletAddress =
-    typeof req.query.address === "string"
-      ? req.query.address.toLowerCase()
-      : null;
-
-  try {
-    await connectDB();
-
-    const [
-      totalMarkets,
-      resolvedMarkets,
-      totalSplits,
-      totalRedemptions,
-      totalTransactions,
-      uniqueWalletsAgg,
-      recentMarketDocs,
-      volumeAgg,
-    ] = await Promise.all([
-      Market.countDocuments(),
-      Market.countDocuments({ resolved: true }),
-      Transaction.countDocuments({ type: "split" }),
-      Transaction.countDocuments({ type: "redeem" }),
-      Transaction.countDocuments(),
-      Transaction.aggregate([
-        { $group: { _id: "$wallet" } },
-        { $count: "count" },
-      ]),
-      Market.find()
-        .sort({ createdAt: -1 })
-        .limit(10)
-        .lean(),
-      Transaction.aggregate([
-        { $match: { type: "split" } },
-        { $group: { _id: null, total: { $sum: { $toDouble: "$amount" } } } },
-      ]),
-    ]);
-
-    const totalVolume = volumeAgg[0]?.total?.toFixed(2) ?? "0";
-
-    const recentMarkets = recentMarketDocs.map((m) => ({
-      conditionId: m.conditionId,
-      questionId: m.questionId,
-      title: m.title,
-      category: m.category,
-      outcomeSlotCount: m.outcomeSlotCount,
-      resolved: m.resolved,
-      winner: m.winner,
-      blockNumber: m.blockNumber,
-      createdAt: m.createdAt.toISOString(),
-    }));
-
-    const totalUniqueWallets = uniqueWalletsAgg[0]?.count ?? 0;
-
-    const response: AnalyticsResponse = {
-      totalMarkets,
-      resolvedMarkets,
-      totalVolume,
-      totalSplits,
-      totalRedemptions,
-      totalTransactions,
-      totalUniqueWallets,
-      recentMarkets,
-    };
-
-    // Per-wallet stats
-    if (walletAddress) {
-      const [
-        marketsCreated,
-        walletSplitAgg,
-        walletRedeemAgg,
-        recentTxs,
-      ] = await Promise.all([
-        Market.countDocuments({ creator: walletAddress }),
-        Transaction.aggregate([
-          { $match: { wallet: walletAddress, type: "split" } },
-          { $group: { _id: null, total: { $sum: { $toDouble: "$amount" } } } },
-        ]),
-        Transaction.aggregate([
-          { $match: { wallet: walletAddress, type: "redeem" } },
-          { $group: { _id: null, total: { $sum: { $toDouble: "$amount" } } } },
-        ]),
-        Transaction.find({ wallet: walletAddress })
-          .sort({ blockNumber: -1 })
-          .limit(20)
-          .lean(),
-      ]);
-
-      response.wallet = {
-        address: walletAddress,
-        marketsCreated,
-        splitVolume: walletSplitAgg[0]?.total?.toFixed(2) ?? "0",
-        redemptionVolume: walletRedeemAgg[0]?.total?.toFixed(2) ?? "0",
-        recentActivity: recentTxs.map((t) => ({
-          txHash: t.txHash,
-          type: t.type,
-          conditionId: t.conditionId,
-          amount: t.amount,
-          blockNumber: t.blockNumber,
-          timestamp: t.timestamp.toISOString(),
-        })),
-      };
-    }
-
-    res.setHeader("Cache-Control", "s-maxage=15, stale-while-revalidate=30");
-    res.status(200).json(response);
-  } catch (err) {
-    const msg = err instanceof Error ? err.message : "Failed to fetch analytics";
-    res.status(500).json({
+    return res.status(405).json({
       totalMarkets: 0,
       resolvedMarkets: 0,
       totalVolume: "0",
@@ -172,8 +52,141 @@ export default async function handler(
       totalTransactions: 0,
       totalUniqueWallets: 0,
       recentMarkets: [],
-      error: msg,
+      error: "Method not allowed",
+    });
+  }
+
+  try {
+    await connectToDatabase();
+
+    const requestChainId = req.query.chainId
+      ? parseInt(req.query.chainId as string, 10)
+      : 42220;
+    const userAddressParam = (req.query.address as string)?.toLowerCase();
+
+    const { Market } = await import("@/models/Market");
+    const { Transaction } = await import("@/models/Transaction");
+
+    // Build chain filter (supports Base Sepolia legacy records)
+    const chainFilter: Record<string, any> = {};
+    if (requestChainId === 84532) {
+      chainFilter["$or"] = [
+        { chainId: 84532 },
+        { chainId: { $exists: false } },
+        { chainId: null },
+      ];
+    } else {
+      chainFilter.chainId = requestChainId;
+    }
+
+    const [markets, transactions] = await Promise.all([
+      Market.find(chainFilter).lean(),
+      Transaction.find(chainFilter).lean(),
+    ]);
+
+    const totalMarkets = markets.length;
+    const resolvedMarkets = markets.filter((m: any) => m.resolved).length;
+
+    // ✅ NEW: Sum volume from all transactions that move value
+    // Exclude 'approve' (no value transfer), include everything else
+    const totalVolume = transactions
+      .filter((t: any) => !["approve"].includes(t.type))
+      .reduce((sum: number, t: any) => {
+        const amount = typeof t.amount === "string" ? parseFloat(t.amount) : t.amount || 0;
+        return sum + amount;
+      }, 0)
+      .toFixed(2);
+
+    // Keep split count separate
+    const totalSplits = transactions.filter((t: any) => t.type === "split").length;
+    const totalRedemptions = transactions.filter((t: any) => t.type === "redeem").length;
+    const totalTransactions = transactions.length;
+
+    const uniqueWalletsSet = new Set(
+      transactions.map((t: any) => t.wallet?.toLowerCase()).filter(Boolean)
+    );
+    const totalUniqueWallets = uniqueWalletsSet.size;
+
+    const recentMarkets = markets.slice(0, 10).map((m: any) => ({
+      conditionId: m.conditionId || "",
+      questionId: m.questionId || "",
+      title: m.title || "",
+      category: m.category || "General",
+      outcomeSlotCount: m.outcomes?.length || 2,
+      resolved: !!m.resolved,
+      winner: m.winner || null,
+      blockNumber: m.blockNumber || 0,
+      createdAt: m.createdAt ? new Date(m.createdAt).toISOString() : new Date().toISOString(),
+    }));
+
+    // Wallet-specific stats
+    let walletResponse: AnalyticsResponse["wallet"] = undefined;
+    if (userAddressParam) {
+      const marketsCreatedCount = markets.filter(
+        (m: any) => m.creator?.toLowerCase() === userAddressParam
+      ).length;
+
+      const userTxs = transactions.filter(
+        (t: any) => t.wallet?.toLowerCase() === userAddressParam
+      );
+
+      const userSplitVol = userTxs
+        .filter((t: any) => t.type === "split")
+        .reduce((sum: number, t: any) => {
+          const amount = typeof t.amount === "string" ? parseFloat(t.amount) : t.amount || 0;
+          return sum + amount;
+        }, 0)
+        .toFixed(2);
+
+      const userRedeemVol = userTxs
+        .filter((t: any) => t.type === "redeem")
+        .reduce((sum: number, t: any) => {
+          const amount = typeof t.amount === "string" ? parseFloat(t.amount) : t.amount || 0;
+          return sum + amount;
+        }, 0)
+        .toFixed(2);
+
+      const recentActivity = userTxs.slice(0, 20).map((t: any) => ({
+        txHash: t.txHash || "",
+        type: t.type || "transaction",
+        conditionId: t.conditionId || null,
+        amount: (t.amount || 0).toString(),
+        blockNumber: t.blockNumber || 0,
+        timestamp: t.timestamp ? new Date(t.timestamp).toISOString() : new Date().toISOString(),
+      }));
+
+      walletResponse = {
+        address: userAddressParam,
+        marketsCreated: marketsCreatedCount,
+        splitVolume: userSplitVol,
+        redemptionVolume: userRedeemVol,
+        recentActivity,
+      };
+    }
+
+    return res.status(200).json({
+      totalMarkets,
+      resolvedMarkets,
+      totalVolume,
+      totalSplits,
+      totalRedemptions,
+      totalTransactions,
+      totalUniqueWallets,
+      recentMarkets,
+      wallet: walletResponse,
+    });
+  } catch (error) {
+    console.error("Analytics API error:", error);
+    return res.status(500).json({
+      totalMarkets: 0,
+      resolvedMarkets: 0,
+      totalVolume: "0",
+      totalSplits: 0,
+      totalRedemptions: 0,
+      totalTransactions: 0,
+      totalUniqueWallets: 0,
+      recentMarkets: [],
+      error: error instanceof Error ? error.message : "Internal server error",
     });
   }
 }
-
