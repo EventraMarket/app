@@ -217,10 +217,10 @@ export default function LandingPage() {
               className="px-8 py-4 bg-[#F3B21A] text-black text-base font-extrabold rounded-2xl hover:brightness-110 hover:scale-105 transition-all duration-200 shadow-lg">
               Browse All Markets →
             </Link>
-            <Link href="/faucet"
+            {/* <Link href="/faucet"
               className="px-8 py-4 bg-white/10 text-white text-base font-semibold rounded-2xl border border-white/20 hover:bg-white/20 transition-all duration-200">
               Get Test USDC
-            </Link>
+            </Link> */}
           </div>
         </div>
       </section>
@@ -235,10 +235,10 @@ export default function LandingPage() {
           <div className="flex items-center gap-6 text-sm text-black/60">
             <Link href="/markets" className="hover:text-black transition-colors">Markets</Link>
             <Link href="/dashboard" className="hover:text-black transition-colors">Dashboard</Link>
-            <Link href="/faucet" className="hover:text-black transition-colors">Faucet</Link>
+            {/* <Link href="/faucet" className="hover:text-black transition-colors">Faucet</Link> */}
             <Link href="/faq" className="hover:text-black transition-colors">FAQ</Link>
           </div>
-          <p className="text-xs text-black/40">© 2026 Eventra · Base Sepolia Testnet</p>
+          <p className="text-xs text-black/40">© 2026 Eventra All right reserved</p>
         </div>
       </footer>
     </div>
