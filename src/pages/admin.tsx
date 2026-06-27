@@ -91,7 +91,8 @@ export default function AdminPage() {
   const [newAdminWallet, setNewAdminWallet] = useState("");
   const [addingAdmin, setAddingAdmin] = useState(false);
   const [addAdminMsg, setAddAdminMsg] = useState<string | null>(null);
-
+  // Adding Initial Liquidity state
+  const [funding, setFunding] = useState("0.1");  
   const checkAdmin = useCallback(async () => {
     if (!address) return;
     setCheckingAdmin(true);
@@ -278,7 +279,7 @@ export default function AdminPage() {
       body: JSON.stringify({ conditionId, fpmmAddress }),
     });
 
-       const seedAmount = parseUnits("1", 6); // 100 USDC
+       const seedAmount = parseUnits(funding, 6); // 0.1 USDT
         // Approve FPMM to spend USDC
         await walletClient.writeContract({
           address: contracts.USDC as `0x${string}`,
@@ -304,12 +305,7 @@ export default function AdminPage() {
       } finally {
         setDeployingFPMM(false);
       }
-    // } catch (err: unknown) {
-    //   const msg = err instanceof Error ? err.message : "Transaction failed";
-    //   setCreateError(msg.length > 150 ? msg.slice(0, 150) + "..." : msg);
-    // } finally {
-    //   setCreating(false);
-    // }
+   
   }
 
   // ── Resolve Market ──────────────────────────────────────────────────────────
@@ -731,6 +727,24 @@ export default function AdminPage() {
                         ))}
                       </div>
                     </div>
+
+                    {/* Funding */}
+                    <div className="bg-black border border-[#D9A650]/50 rounded-xl p-6">
+  <label className="block text-sm font-semibold mb-2 text-[#f7f7fa]">
+    Initial Liquidity (USDT)
+    <span className="text-[#D9A650]/80 font-normal ml-2">(seeds the FPMM)</span>
+  </label>
+  <input
+    type="number"
+    value={funding}
+    onChange={(e) => setFunding(e.target.value)}
+    placeholder="e.g. 100"
+    className="w-full px-4 py-3 bg-black/80 border border-[#D9A650]/50 rounded-lg text-white text-sm placeholder-[#D9A650]/50 focus:outline-none focus:border-[#F3B21A] transition"
+    disabled={creating}
+    min="1"
+    step="1"
+  />
+</div>
 
                     {/* Info */}
                     <div className="bg-yellow-400/5 border border-yellow-400/20 rounded-xl p-4 text-xs text-yellow-300 space-y-1">

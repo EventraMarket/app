@@ -9,7 +9,7 @@ import { useAccount, usePublicClient } from "wagmi";
 import { formatUnits } from "viem";
 import type { AnalyticsResponse } from "./api/analytics";
 import { getContracts, CONTRACT_ADDRESSES, USDC_ABI } from "@/lib/contracts";
-
+import {getChainName} from "@/lib/useMarkets";
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 
 function StatCard({ label, value, sub, mono }: { label: string; value: string; sub?: string; mono?: boolean }) {
@@ -48,7 +48,8 @@ export default function DashboardPage() {
 
   // Forced strictly to Celo Mainnet settings for analytical layers
   const CELO_MAINNET_ID = 42220;
-  const currentNetworkName = "Celo Mainnet";
+  // const currentNetworkName = "Celo Mainnet";
+  const currentNetworkName = getChainName(chainId || CELO_MAINNET_ID);
   const explorerBaseUrl = "https://celoscan.io";
 
 
